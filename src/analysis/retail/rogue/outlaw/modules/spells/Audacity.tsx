@@ -11,10 +11,11 @@ import AudacityDamageTracker from './AudacityDamageTracker';
 class Audacity extends Analyzer {
   get thresholds(): NumberThreshold {
     const total = this.damageTracker.getAbility(SPELLS.SINISTER_STRIKE.id);
-    const filtered = this.audacityDamageTracker.getAbility(SPELLS.SINISTER_STRIKE.id);
+    const filteredSinister = this.audacityDamageTracker.getAbility(SPELLS.SINISTER_STRIKE.id);
+    const filteredPistol = this.audacityDamageTracker.getAbility(SPELLS.SINISTER_STRIKE.id);
 
     return {
-      actual: filtered.casts / total.casts,
+      actual: (filteredSinister.casts + filteredPistol.casts) / total.casts,
       isGreaterThan: {
         minor: 0,
         average: 0.05,
@@ -38,13 +39,18 @@ class Audacity extends Analyzer {
       [SPELLS.SINISTER_STRIKE],
       () => `Ambush should be used as your builder when audacity proc is up`,
     );
+    options.audacityDamageTracker.subscribeInefficientCast(
+      [SPELLS.PISTOL_SHOT],
+      () => `Ambush should be used as your builder when audacity proc is up`,
+    );
   }
 
   suggestions(when: When) {
     when(this.thresholds).addSuggestion((suggest, actual, recommended) =>
       suggest(
         <>
-          You casted <SpellLink id={SPELLS.SINISTER_STRIKE.id} /> while having an{' '}
+          You casted <SpellLink id={SPELLS.SINISTER_STRIKE.id} /> and/or{' '}
+          <SpellLink id={SPELLS.PISTOL_SHOT.id} /> while having an{' '}
           <SpellLink id={SPELLS.AUDACITY.id} /> proc. Try to prioritize{' '}
           <SpellLink id={SPELLS.AMBUSH.id} /> as your combo point builder when you have{' '}
           <SpellLink id={SPELLS.AUDACITY.id} /> active to avoid the possibility of missing

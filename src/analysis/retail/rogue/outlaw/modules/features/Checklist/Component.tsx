@@ -112,10 +112,10 @@ const OutlawRogueChecklist = ({
         name="Make sure to use your audacity procs"
         description={
           <>
-            Your <SpellLink id={SPELLS.AUDACITY.id} /> proc will do more damage than a{' '}
-            <SpellLink id={SPELLS.SINISTER_STRIKE.id} />, so make sure to use{' '}
-            <SpellLink id={SPELLS.AMBUSH.id} /> as your combo point builder when the proc is
-            available and you aren't already capped on combo points.
+            Your <SpellLink id={SPELLS.AUDACITY.id} /> proc will be more valuable than a{' '}
+            <SpellLink id={SPELLS.SINISTER_STRIKE.id} /> or <SpellLink id={SPELLS.PISTOL_SHOT.id} />
+            , so make sure to use <SpellLink id={SPELLS.AMBUSH.id} /> as your combo point builder
+            when the proc is available and you aren't already capped on combo points.
           </>
         }
       >
