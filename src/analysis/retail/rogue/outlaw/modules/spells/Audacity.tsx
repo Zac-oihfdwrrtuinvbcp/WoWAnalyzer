@@ -8,16 +8,21 @@ import DamageTracker from 'parser/shared/modules/AbilityTracker';
 
 import AudacityDamageTracker from './AudacityDamageTracker';
 
+//--TODO: maybe a better way to display the delayed/potentially overwritten casts than percentage?
+//        maybe separate ss overwrite than ps since ps is much more problematic than ss
+
 class Audacity extends Analyzer {
   get thresholds(): NumberThreshold {
-    const total = this.damageTracker.getAbility(SPELLS.SINISTER_STRIKE.id);
+    const totalSinister = this.damageTracker.getAbility(SPELLS.SINISTER_STRIKE.id);
+    const totalPistol = this.damageTracker.getAbility(SPELLS.PISTOL_SHOT.id);
     const filteredSinister = this.audacityDamageTracker.getAbility(SPELLS.SINISTER_STRIKE.id);
-    const filteredPistol = this.audacityDamageTracker.getAbility(SPELLS.SINISTER_STRIKE.id);
+    const filteredPistol = this.audacityDamageTracker.getAbility(SPELLS.PISTOL_SHOT.id);
 
     return {
-      actual: (filteredSinister.casts + filteredPistol.casts) / total.casts,
+      actual:
+        (filteredSinister.casts + filteredPistol.casts) / (totalSinister.casts + totalPistol.casts),
       isGreaterThan: {
-        minor: 0,
+        minor: 0.01,
         average: 0.05,
         major: 0.1,
       },
