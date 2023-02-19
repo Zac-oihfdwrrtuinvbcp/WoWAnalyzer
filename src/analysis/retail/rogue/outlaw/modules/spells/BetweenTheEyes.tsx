@@ -9,8 +9,11 @@ import SpellUsable from 'parser/shared/modules/SpellUsable';
 import BoringSpellValueText from 'parser/ui/BoringSpellValueText';
 import Statistic from 'parser/ui/Statistic';
 import STATISTIC_CATEGORY from 'parser/ui/STATISTIC_CATEGORY';
+import Enemies from 'parser/shared/modules/Enemies';
 
 import AlwaysBeCasting from '../features/AlwaysBeCasting';
+
+//--TODO: This should probably track bte debuff uptime instead when not talented into gsw
 
 class BetweenTheEyes extends Analyzer {
   timestampFromCD: number = 0;
@@ -20,9 +23,11 @@ class BetweenTheEyes extends Analyzer {
   static dependencies = {
     spellUsable: SpellUsable,
     alwaysBeCasting: AlwaysBeCasting,
+    enemies: Enemies,
   };
   protected spellUsable!: SpellUsable;
   protected alwaysBeCasting!: AlwaysBeCasting;
+  protected enemies!: Enemies;
 
   constructor(options: Options) {
     super(options);
@@ -61,6 +66,10 @@ class BetweenTheEyes extends Analyzer {
       },
       style: ThresholdStyle.PERCENTAGE,
     };
+  }
+
+  get uptimeHistory() {
+    return this.enemies.getDebuffHistory(SPELLS.BETWEEN_THE_EYES.id);
   }
 
   get secondsOffCD(): number {
