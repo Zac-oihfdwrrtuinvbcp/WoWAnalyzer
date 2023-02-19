@@ -10,8 +10,10 @@ import OpportunityDamageTracker from './OpportunityDamageTracker';
 
 class Opportunity extends Analyzer {
   get thresholds(): NumberThreshold {
-    const total = this.damageTracker.getAbility(SPELLS.SINISTER_STRIKE.id);
+    const total = this.damageTracker.getAbility(SPELLS.PISTOL_SHOT.id);
     const filtered = this.opportunityDamageTracker.getAbility(SPELLS.SINISTER_STRIKE.id);
+    console.log('Total op shots:' + total.casts);
+    console.log('SS casts while opp:' + filtered.casts);
 
     return {
       actual: filtered.casts / total.casts,
