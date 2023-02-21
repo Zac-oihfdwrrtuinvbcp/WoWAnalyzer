@@ -42,6 +42,8 @@ import InvigoratingShadowdust from 'analysis/retail/rogue/shared/shadowlands/leg
 import Audacity from './modules/spells/Audacity';
 import AudacityDamageTracker from './modules/spells/AudacityDamageTracker';
 import Guide from './Guide';
+import BuilderUse from './modules/core/BuilderUse';
+import FinisherUse from './modules/core/FinisherUse';
 //import CastLinkNormalizer from './normalizers/CastLinkNormalizer';
 
 class CombatLogParser extends CoreCombatLogParser {
@@ -67,6 +69,10 @@ class CombatLogParser extends CoreCombatLogParser {
     energy: Energy,
     energyGraph: EnergyGraph,
     spellEnergyCost: SpellEnergyCost,
+
+    // Core
+    builderUse: BuilderUse,
+    finisherUse: FinisherUse,
 
     //Legendaries
     invigoratingShadowdust: InvigoratingShadowdust,
