@@ -13,6 +13,8 @@ import {
 } from 'analysis/retail/rogue/shared';
 import CoreCombatLogParser from 'parser/core/CombatLogParser';
 import ArcaneTorrent from 'parser/shared/modules/racials/bloodelf/ArcaneTorrent';
+import EnergyGraph from 'analysis/retail/rogue/shared/EnergyGraph';
+import ComboPointGraph from 'analysis/retail/rogue/shared/ComboPointGraph';
 
 import Abilities from './modules/Abilities';
 import Buffs from './modules/Buffs';
@@ -40,6 +42,7 @@ import InvigoratingShadowdust from 'analysis/retail/rogue/shared/shadowlands/leg
 import Audacity from './modules/spells/Audacity';
 import AudacityDamageTracker from './modules/spells/AudacityDamageTracker';
 import Guide from './Guide';
+//import CastLinkNormalizer from './normalizers/CastLinkNormalizer';
 
 class CombatLogParser extends CoreCombatLogParser {
   static specModules = {
@@ -50,14 +53,19 @@ class CombatLogParser extends CoreCombatLogParser {
     spellUsable: SpellUsable,
     checklist: Checklist,
 
+    //Normalizers
+    //castLinkNormalizer: CastLinkNormalizer,
+
     //Resource
     comboPointTracker: OutlawComboPointTracker,
     comboPointDetails: ComboPointDetails,
     comboPoints: ComboPoints,
+    comboPointGraph: ComboPointGraph,
     energyTracker: EnergyTracker,
     energyCapTracker: OutlawEnergyCapTracker,
     energyDetails: EnergyDetails,
     energy: Energy,
+    energyGraph: EnergyGraph,
     spellEnergyCost: SpellEnergyCost,
 
     //Legendaries
