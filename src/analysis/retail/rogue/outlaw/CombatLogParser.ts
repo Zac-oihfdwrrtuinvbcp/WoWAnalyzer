@@ -44,6 +44,7 @@ import AudacityDamageTracker from './modules/spells/AudacityDamageTracker';
 import Guide from './Guide';
 import BuilderUse from './modules/core/BuilderUse';
 import FinisherUse from './modules/core/FinisherUse';
+import FanTheHammerNormalizer from './normalizers/FanTheHammerNormalizer';
 //import CastLinkNormalizer from './normalizers/CastLinkNormalizer';
 
 class CombatLogParser extends CoreCombatLogParser {
@@ -103,6 +104,9 @@ class CombatLogParser extends CoreCombatLogParser {
     flagellation: Flagellation,
     sepsis: Sepsis,
     stealthAbilityFollowingSepsis: StealthAbilityFollowingSepsis,
+
+    //Normalizers
+    fanTheHammerNormalizer: FanTheHammerNormalizer,
 
     // Outlaw's throughput benefit isn't as big as for other classes since we don't have a lot of free gcds to use
     arcaneTorrent: [
