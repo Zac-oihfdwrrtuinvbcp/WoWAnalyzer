@@ -1,56 +1,74 @@
 import SPELLS from 'common/SPELLS';
-import { AnyEvent, EventType, DamageEvent } from 'parser/core/Events';
+import { AnyEvent, EventType } from 'parser/core/Events';
 import EventsNormalizer from 'parser/core/EventsNormalizer';
-import GlobalCooldown from 'parser/shared/modules/GlobalCooldown';
+//import { Options } from 'parser/core/Module';
+//import GlobalCooldown from 'parser/shared/modules/GlobalCooldown';
 
 class FanTheHammerNormalizer extends EventsNormalizer {
   // static dependencies = {
   //   globalCooldown: GlobalCooldown,
   // };
+  lastGlobalCooldown: AnyEvent | undefined;
 
-  protected globalCooldown!: GlobalCooldown;
+  //protected globalCooldown!: GlobalCooldown;
 
   normalize(events: AnyEvent[]) {
     const fixedEvents: AnyEvent[] = [];
     const pistolShotCastId = SPELLS.PISTOL_SHOT.id;
+
     // const killCommandCastId = TALENTS_HUNTER.KILL_COMMAND_SHARED_TALENT.id;
     // const direBeastCastId = [TALENTS_HUNTER.DIRE_BEAST_TALENT.id, SPELLS.DIRE_BEAST_GLYPHED.id];
     // const direBeastSummonCastId = [SPELLS.DIRE_BEAST_SUMMON.id, SPELLS.DIRE_BEAST_GLYPHED.id];
     // const relevantIds = [killCommandCastId, ...direBeastCastId];
     // const bufferMs = 50;
-
     events.forEach((event: AnyEvent, idx: number) => {
       //We are only interested in Kill Command and Dire Beast casts
       fixedEvents.push(event);
+
       if (event.type !== EventType.Cast) {
         return;
       }
+
       const spellId = event.ability.guid;
       if (spellId !== pistolShotCastId) {
         return;
       }
 
-      if (event.targetID && event.targetInstance) {
-        console.log('Event: ', event, 'GCD: ', this.globalCooldown.lastGlobalCooldown);
+      console.log('PS ', idx);
 
-        if (this.globalCooldown.lastGlobalCooldown) {
-          fixedEvents.splice(idx, 1);
-          const newEvent: DamageEvent = {
-            sourceIsFriendly: true,
-            targetID: event.targetID,
-            targetInstance: event.targetInstance,
-            targetIsFriendly: false,
-            ability: event.ability,
-            hitType: 1,
-            amount: 1,
-            spellPower: 1,
-            type: EventType.Damage,
-            timestamp: event.timestamp,
-          };
-
-          fixedEvents.push(newEvent);
-        }
+      if (!this.lastGlobalCooldown) {
+        this.lastGlobalCooldown = event;
+        return;
       }
+
+      if (event.timestamp - this.lastGlobalCooldown.timestamp < 800) {
+        console.log('delete', idx);
+        fixedEvents.splice(idx, 1);
+      } else {
+        this.lastGlobalCooldown = event;
+      }
+
+      // if (event.targetID && event.targetInstance) {
+      //   console.log('Event: ', event, 'GCD: ', this.globalCooldown.lastGlobalCooldown);
+
+      //   if (this.globalCooldown.lastGlobalCooldown) {
+      //     fixedEvents.splice(idx, 1);
+      //     const newEvent: DamageEvent = {
+      //       sourceIsFriendly: true,
+      //       targetID: event.targetID,
+      //       targetInstance: event.targetInstance,
+      //       targetIsFriendly: false,
+      //       ability: event.ability,
+      //       hitType: 1,
+      //       amount: 1,
+      //       spellPower: 1,
+      //       type: EventType.Damage,
+      //       timestamp: event.timestamp,
+      //     };
+
+      //     fixedEvents.push(newEvent);
+      //   }
+      // }
 
       // fixedEvents.push({
       //   ...event,
