@@ -45,6 +45,7 @@ import Guide from './Guide';
 import BuilderUse from './modules/core/BuilderUse';
 import FinisherUse from './modules/core/FinisherUse';
 import FanTheHammerNormalizer from './normalizers/FanTheHammerNormalizer';
+import AplCheck from './modules/AplCheck';
 //import CastLinkNormalizer from './normalizers/CastLinkNormalizer';
 
 class CombatLogParser extends CoreCombatLogParser {
@@ -117,6 +118,8 @@ class CombatLogParser extends CoreCombatLogParser {
         extraSuggestion: 'You should be using Arcane Torrent whenever you have a free GCD for it.',
       },
     ] as const,
+
+    apl: AplCheck,
   };
 
   static guide = Guide;
