@@ -11,11 +11,14 @@ import { RoundedPanel, SideBySidePanels } from 'interface/guide/components/Guide
 import RESOURCE_TYPES from 'game/RESOURCE_TYPES';
 
 import CombatLogParser from './CombatLogParser';
+import { AplSectionData } from 'interface/guide/components/Apl';
+import * as AplCheck from './modules/AplCheck';
 
 export default function Guide({ modules, events, info }: GuideProps<typeof CombatLogParser>) {
   return (
     <>
       <ResourceUsageSection modules={modules} events={events} info={info} />
+      <CoreRotation modules={modules} events={events} info={info} />
       <PreparationSection />
     </>
   );
@@ -76,6 +79,33 @@ function ResourceUsageSection({ modules }: GuideProps<typeof CombatLogParser>) {
           <RoundedPanel>{modules.finisherUse.chart}</RoundedPanel>
         </SideBySidePanels>
       </SubSection>
+    </Section>
+  );
+}
+
+function CoreRotation({ modules, info }: GuideProps<typeof CombatLogParser>) {
+  return (
+    <Section title="Core Rotation (Experimental)">
+      <p>
+        The Devastation rotation is driven by a priority list.
+      </p>
+
+      <p>
+        This Action Priority List (APL) is based off the simple{' '}
+        <a href="https://www.wowhead.com/guide/classes/evoker/devastation/rotation-cooldowns-pve-dps#single-target">
+          Single Target
+        </a>{' '}
+        and{' '}
+        <a href="https://www.wowhead.com/guide/classes/evoker/devastation/rotation-cooldowns-pve-dps#multi-target">
+          Multi-Target
+        </a>{' '}
+        rotation on Wowhead.
+      </p>
+      <AplSectionData checker={AplCheck.check} apl={AplCheck.apl()} />
+      <hr />
+      <p>
+        As mentioned before use the accuracy here as a reference point to compare to other logs.
+      </p>
     </Section>
   );
 }

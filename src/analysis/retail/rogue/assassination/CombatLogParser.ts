@@ -27,6 +27,7 @@ import Envenom from './modules/spells/Envenom';
 import Exsanguinate from './modules/talents/Exsanguinate';
 import ThistleTea from './modules/talents/ThistleTea';
 import Guide from './Guide';
+import AplCheck from '../outlaw/modules/AplCheck';
 
 class CombatLogParser extends CoreCombatLogParser {
   static specModules = {
@@ -67,6 +68,8 @@ class CombatLogParser extends CoreCombatLogParser {
 
     // Racials
     arcaneTorrent: [ArcaneTorrent, { gcd: 1000 }] as const,
+
+    apls: AplCheck,
   };
 
   static guide = Guide;
