@@ -4,7 +4,7 @@ import { t, Trans } from '@lingui/macro';
 import EnergyCapWaste from 'analysis/retail/rogue/shared/guide/EnergyCapWaste';
 //import TALENTS from 'common/TALENTS/rogue';
 //import HideExplanationsToggle from 'interface/guide/components/HideExplanationsToggle';
-import { ResourceLink } from 'interface';
+import { ResourceLink, SpellLink } from 'interface';
 //import SPELLS from 'common/SPELLS';
 import { RoundedPanel, SideBySidePanels } from 'interface/guide/components/GuideDivs';
 //import CooldownUsage from 'parser/core/MajorCooldowns/CooldownUsage';
@@ -13,6 +13,7 @@ import RESOURCE_TYPES from 'game/RESOURCE_TYPES';
 import CombatLogParser from './CombatLogParser';
 import { AplSectionData } from 'interface/guide/components/Apl';
 import * as AplCheck from './modules/AplCheck';
+import { TALENTS_ROGUE } from 'common/TALENTS';
 
 export default function Guide({ modules, events, info }: GuideProps<typeof CombatLogParser>) {
   return (
@@ -60,6 +61,15 @@ function ResourceUsageSection({ modules }: GuideProps<typeof CombatLogParser>) {
           wasted={energyWasted}
         />
         {modules.energyGraph.plot}
+        <p></p>
+        <p>
+          <Trans id="guide.rogue.outlaw.sections.resources.energy.BRandKS">
+            -- WIP section -- This will highlight{' '}
+            <SpellLink id={TALENTS_ROGUE.BLADE_RUSH_TALENT.id} />
+            and <SpellLink id={TALENTS_ROGUE.KILLING_SPREE_TALENT.id} />
+            usage when talented as we primarly use both these spells for energy efficiency.
+          </Trans>
+        </p>
       </SubSection>
       <SubSection
         title={t({
@@ -78,6 +88,12 @@ function ResourceUsageSection({ modules }: GuideProps<typeof CombatLogParser>) {
           <RoundedPanel>{modules.builderUse.chart}</RoundedPanel>
           <RoundedPanel>{modules.finisherUse.chart}</RoundedPanel>
         </SideBySidePanels>
+        <p></p>
+        <p>
+          <Trans id="guide.rogue.outlaw.sections.resources.comboPoints.buildersBreakdown">
+            -- WIP section -- Maybe highlight which builders the user is commonly overcapping with.
+          </Trans>
+        </p>
       </SubSection>
     </Section>
   );
@@ -86,20 +102,14 @@ function ResourceUsageSection({ modules }: GuideProps<typeof CombatLogParser>) {
 function CoreRotation({ modules, info }: GuideProps<typeof CombatLogParser>) {
   return (
     <Section title="Core Rotation (Experimental)">
-      <p>
-        The Devastation rotation is driven by a priority list.
-      </p>
+      <p>Outlaw rogue rotation is driven by a priority list.</p>
 
       <p>
-        This Action Priority List (APL) is based off the simple{' '}
-        <a href="https://www.wowhead.com/guide/classes/evoker/devastation/rotation-cooldowns-pve-dps#single-target">
-          Single Target
-        </a>{' '}
-        and{' '}
-        <a href="https://www.wowhead.com/guide/classes/evoker/devastation/rotation-cooldowns-pve-dps#multi-target">
-          Multi-Target
-        </a>{' '}
-        rotation on Wowhead.
+        This Action Priority List (APL) is a simplified version off the simc APL that can be found{' '}
+        <a href="https://raw.githubusercontent.com/simulationcraft/simc/dragonflight/engine/class_modules/apl/rogue/outlaw_df.simc">
+          here
+        </a>
+        .
       </p>
       <AplSectionData checker={AplCheck.check} apl={AplCheck.apl()} />
       <hr />
