@@ -19,7 +19,7 @@ export default function Guide({ modules, events, info }: GuideProps<typeof Comba
   return (
     <>
       <ResourceUsageSection modules={modules} events={events} info={info} />
-      <CoreRotation modules={modules} events={events} info={info} />
+      <AcionPriorityList modules={modules} events={events} info={info} />
       <PreparationSection />
     </>
   );
@@ -99,9 +99,9 @@ function ResourceUsageSection({ modules }: GuideProps<typeof CombatLogParser>) {
   );
 }
 
-function CoreRotation({ modules, info }: GuideProps<typeof CombatLogParser>) {
+function AcionPriorityList({ modules, info }: GuideProps<typeof CombatLogParser>) {
   return (
-    <Section title="Core Rotation (Experimental)">
+    <Section title="Acion Priority List">
       <p>Outlaw rogue rotation is driven by a priority list.</p>
 
       <p>
