@@ -38,6 +38,7 @@ class Abilities extends CoreAbilities {
       {
         spell: TALENTS.ROLL_THE_BONES_TALENT.id,
         category: SPELL_CATEGORY.ROTATIONAL,
+        cooldown: 45,
         gcd: {
           static: standardGcd,
         },
