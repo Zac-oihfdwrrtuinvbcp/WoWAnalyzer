@@ -19,7 +19,7 @@ import {
   or,
   describe,
   buffStacks,
-  spellAvailable,
+  not,
   optional,
 } from 'parser/shared/metrics/apl/conditions';
 
@@ -53,6 +53,7 @@ const notInStealthCondition = () => {
       buffMissing(SPELLS.SHADOW_DANCE_BUFF),
       buffMissing(SPELLS.SUBTERFUGE_BUFF),
       buffMissing(SPELLS.STEALTH_BUFF),
+      buffMissing(SPELLS.VANISH_BUFF),
     ),
     (tense) => <>you {tenseAlt(tense, 'are', 'were')} not in stealth stance</>,
   );
@@ -93,15 +94,26 @@ const COMMON_COOLDOWN: Rule[] = [
         </>
       )),
       notInStealthCondition(),
+      optional(not(hasFinisherCondition())),
     ),
   },
   {
-    spell: SPELLS.SHADOW_DANCE,
-    condition: and(
-      buffMissing(SPELLS.AUDACITY_TALENT_BUFF),
-      buffMissing(SPELLS.OPPORTUNITY),
-      spellAvailable(SPELLS.VANISH, true),
-      notInStealthCondition(),
+    spell: TALENTS.SHADOW_DANCE_TALENT,
+    condition: describe(
+      and(
+        buffMissing(SPELLS.AUDACITY_TALENT_BUFF),
+        buffMissing(SPELLS.OPPORTUNITY),
+        //I don't think the inverse part of this function work correclty, not sure how to update tho
+        //spellAvailable(SPELLS.VANISH, true),
+        notInStealthCondition(),
+        optional(not(hasFinisherCondition())),
+      ),
+      (tense) => (
+        <>
+          <SpellLink id={SPELLS.AUDACITY_TALENT_BUFF} /> and <SpellLink id={SPELLS.OPPORTUNITY} />{' '}
+          {tenseAlt(tense, 'are', 'were')} missing
+        </>
+      ),
     ),
   },
 ];
@@ -116,6 +128,7 @@ const COMMON_FINISHER: Rule[] = [
         duration: 21000,
         pandemicCap: 4,
       }),
+      //optional(buffMissing(SPELLS.SHADOW_DANCE_BUFF),),
     ),
   },
   {
@@ -158,6 +171,7 @@ export const COMMON_BUILDER: Rule[] = [
           buffPresent(SPELLS.SHADOW_DANCE_BUFF),
           buffPresent(SPELLS.SUBTERFUGE_BUFF),
           buffPresent(SPELLS.STEALTH_BUFF),
+          buffPresent(SPELLS.VANISH_BUFF),
         ),
         (tense) => <>you {tenseAlt(tense, 'are', 'were')} in stealth stance</>,
       ),
