@@ -21,11 +21,14 @@ import {
   buffStacks,
   not,
   optional,
+  hasTalent,
 } from 'parser/shared/metrics/apl/conditions';
 
 import { AnyEvent } from 'parser/core/Events';
 import RESOURCE_TYPES from 'game/RESOURCE_TYPES';
 import { SpellLink } from 'interface';
+import { ROLL_THE_BONES_BUFFS } from '../../constants';
+import { buffsCount } from './buffsCount';
 //import Finishers from '../features/Finishers'
 
 //--TODO: Figure out pandemic thingy for GS and BTE
@@ -35,17 +38,11 @@ const hasFinisherCondition = () => {
   return hasResource(RESOURCE_TYPES.COMBO_POINTS, { atLeast: 6 });
 };
 
-// const rtbCondition = () => {
-//   const hasBS = buffPresent(SPELLS.BROADSIDE).validate;
-//   const hasTB = buffPresent(SPELLS.TRUE_BEARING).validate;
-//   const hasRS = buffPresent(SPELLS.RUTHLESS_PRECISION).validate;
-//   const hasSnC = buffPresent(SPELLS.SKULL_AND_CROSSBONES).validate;
-//   const hasBT = buffPresent(SPELLS.BURIED_TREASURE).validate;
-//   //const rtbBuffCount = hasBS + hasTB + hasRS + hasSnC + hasBT;
-
-//   //if snc is down and rtbBuffCount < 2 should reroll
-//    //return describe()
-// };
+//if snc is down and rtbBuffCount < 2 should reroll
+const rtbCondition = () => {
+  const rtbBuffsToCheck = ROLL_THE_BONES_BUFFS.filter((spell) => spell !== SPELLS.GRAND_MELEE);
+  return and(buffMissing(SPELLS.SKULL_AND_CROSSBONES), buffsCount(rtbBuffsToCheck, 2, 'lessThan'));
+};
 
 const notInStealthCondition = () => {
   return describe(
@@ -80,7 +77,7 @@ const COMMON_COOLDOWN: Rule[] = [
   },
   {
     spell: TALENTS.ROLL_THE_BONES_TALENT,
-    condition: buffMissing(TALENTS.ROLL_THE_BONES_TALENT),
+    condition: rtbCondition(),
   },
   {
     spell: SPELLS.VANISH,
@@ -151,15 +148,25 @@ const COMMON_FINISHER: Rule[] = [
 ];
 
 export const COMMON_BUILDER: Rule[] = [
+  // Commented for now as GS doesn't have an associated applyDebuff and removeDebuff event
+  // {
+  //   spell: TALENTS.GHOSTLY_STRIKE_TALENT,
+  //   condition: and(
+  //     debuffMissing(TALENTS.GHOSTLY_STRIKE_TALENT, {
+  //       timeRemaining: 3000,
+  //       duration: 10000,
+  //       pandemicCap: 0,
+  //     }),
+  //     notInStealthCondition(),
+  //   ),
+  // },
+
+  // This seems to not function correctly
   {
-    spell: TALENTS.GHOSTLY_STRIKE_TALENT,
+    spell: SPELLS.PISTOL_SHOT,
     condition: and(
-      debuffMissing(TALENTS.GHOSTLY_STRIKE_TALENT, {
-        timeRemaining: 3000,
-        duration: 10000,
-        pandemicCap: 0,
-      }),
-      notInStealthCondition(),
+      buffStacks(SPELLS.OPPORTUNITY, { atLeast: 6 }),
+      not(hasTalent(TALENTS.COUNT_THE_ODDS_TALENT)),
     ),
   },
   {
