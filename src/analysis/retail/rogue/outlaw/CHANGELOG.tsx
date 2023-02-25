@@ -7,6 +7,7 @@ import SPELLS from 'common/SPELLS';
 
 export default [
   change(date(2023, 2, 24), <>First pass at guide with ressource section.</>, zac),
+  change(date(2023, 2, 24), <>Various fixes.</>, zac),
   change(date(2023, 2, 22), <>Add Fan the hammer normalizer to ignore subsequents <SpellLink id={SPELLS.PISTOL_SHOT}/> fake casts events.</>, zac),
   change(date(2023, 2, 20), <>First implementation of <SpellLink id={TALENTS.AUDACITY_TALENT} />.</>, zac),
   change(date(2022,11, 3), <>Enabling Spec for Dragonflight.</>, Anty),
