@@ -40,6 +40,7 @@ import InvigoratingShadowdust from 'analysis/retail/rogue/shared/shadowlands/leg
 import Audacity from './modules/spells/Audacity';
 import AudacityDamageTracker from './modules/spells/AudacityDamageTracker';
 import FanTheHammerNormalizer from './normalizers/FanTheHammerNormalizer';
+import GhostlyStrikeEventFabricator from './modules/core/GhostlyStrikeEventFabricator';
 
 class CombatLogParser extends CoreCombatLogParser {
   static specModules = {
@@ -70,6 +71,7 @@ class CombatLogParser extends CoreCombatLogParser {
     restlessBlades: RestlessBlades,
     rollTheBonesCastTracker: RollTheBonesCastTracker,
     instantPoison: InstantPoison,
+    ghostlyStrikeEventFabricator: GhostlyStrikeEventFabricator,
 
     //Casts
     dispatch: Dispatch,
