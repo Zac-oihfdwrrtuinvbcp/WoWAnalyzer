@@ -151,7 +151,7 @@ class Abilities extends CoreAbilities {
       {
         spell: TALENTS.BLADE_RUSH_TALENT.id,
         category: SPELL_CATEGORY.COOLDOWNS,
-        cooldown: 30,
+        cooldown: 45,
         gcd: {
           static: standardGcd,
         },
@@ -253,7 +253,7 @@ class Abilities extends CoreAbilities {
       {
         spell: SPELLS.SPRINT.id,
         category: SPELL_CATEGORY.UTILITY,
-        cooldown: 60,
+        cooldown: 120 - (combatant.hasTalent(TALENTS.IMPROVED_SPRINT_TALENT) ? 60 : 0),
         gcd: null,
       },
       {
