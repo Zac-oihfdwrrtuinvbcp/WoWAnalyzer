@@ -5,10 +5,10 @@ import Events, {
   ApplyDebuffEvent,
   DamageEvent,
   EventType,
-  //RefreshDebuffEvent,
+  RefreshDebuffEvent,
   RemoveDebuffEvent,
 } from 'parser/core/Events';
-//import SPELLS from 'common/SPELLS';
+import SPELLS from 'common/SPELLS';
 import Enemies from 'parser/shared/modules/Enemies';
 
 const GS_DEBUFF_BASE_LENGHT = 10_000;
@@ -34,10 +34,10 @@ class GhostlyStrikeEventFabricator extends Analyzer {
       this.applyDebuffDebug,
     );
 
-    // this.addEventListener(
-    //   Events.applydebuff.by(SELECTED_PLAYER).spell(SPELLS.BETWEEN_THE_EYES),
-    //   this.applyDebuffDebug,
-    // );
+    this.addEventListener(
+      Events.refreshdebuff.by(SELECTED_PLAYER).spell(SPELLS.BETWEEN_THE_EYES),
+      this.refreshDebuffDebug,
+    );
 
     this.addEventListener(
       Events.removedebuff.by(SELECTED_PLAYER).spell(TALENTS.GHOSTLY_STRIKE_TALENT),
@@ -55,73 +55,39 @@ class GhostlyStrikeEventFabricator extends Analyzer {
     //console.log(ennemy);
     const gsDebuff = ennemy?.getBuff(event.ability.guid, event.timestamp, event.sourceID);
     //console.log(gsDebuff);
+    const gsApplyDebuffEvent: ApplyDebuffEvent = {
+      type: EventType.ApplyDebuff,
+      source: event.source,
+      ability: event.ability,
+      timestamp: event.timestamp,
+      sourceID: event.sourceID,
+      targetID: event.targetID!,
+      targetIsFriendly: false,
+      sourceIsFriendly: true,
+    };
 
-    if (!ennemy || gsDebuff === undefined) {
-      //console.log('Gs debuff not present, fabricate applyDebuff and removeDebuff');
-      const gsApplyDebuffEvent: ApplyDebuffEvent = {
-        type: EventType.ApplyDebuff,
-        source: event.source,
-        ability: event.ability,
-        timestamp: event.timestamp,
-        sourceID: event.sourceID,
-        targetID: event.targetID!,
-        targetIsFriendly: false,
-        sourceIsFriendly: true,
-      };
-      const gsRemoveDebuffEvent: RemoveDebuffEvent = {
-        type: EventType.RemoveDebuff,
-        source: event.source,
-        ability: event.ability,
-        timestamp: event.timestamp + 10_000,
-        sourceID: event.sourceID,
-        targetID: event.targetID!,
-        targetIsFriendly: false,
-        sourceIsFriendly: true,
-      };
+    const gsRemoveDebuffEvent: RemoveDebuffEvent = {
+      type: EventType.RemoveDebuff,
+      source: event.source,
+      ability: event.ability,
+      timestamp: event.timestamp + 10_000,
+      sourceID: event.sourceID,
+      targetID: event.targetID!,
+      targetIsFriendly: false,
+      sourceIsFriendly: true,
+    };
 
-      this.eventEmitter.fabricateEvent(gsApplyDebuffEvent);
-      this.eventEmitter.fabricateEvent(gsRemoveDebuffEvent);
-    } else {
+    if (ennemy && gsDebuff) {
       const remainingTime = gsDebuff.end! - event.timestamp;
       const pandemic = Math.min(remainingTime, GS_DEBUFF_BASE_LENGHT * 0.3);
-
-      const gsDebuffRefreshEvent: ApplyDebuffEvent = {
-        type: EventType.ApplyDebuff,
-        source: event.source,
-        ability: event.ability,
-        timestamp: event.timestamp,
-        sourceID: event.sourceID,
-        targetID: event.targetID!,
-        targetIsFriendly: false,
-        sourceIsFriendly: true,
-      };
-
-      const gsRemoveDebuffEvent: RemoveDebuffEvent = {
-        type: EventType.RemoveDebuff,
-        source: event.source,
-        ability: event.ability,
-        timestamp: event.timestamp + 10_000 + pandemic,
-        sourceID: event.sourceID,
-        targetID: event.targetID!,
-        targetIsFriendly: false,
-        sourceIsFriendly: true,
-      };
-
+      gsRemoveDebuffEvent.timestamp += pandemic;
       //console.log('Gs debuff already present, remaining: ', remainingTime, gsDebuff);
-      this.eventEmitter.fabricateEvent(gsDebuffRefreshEvent);
-      this.eventEmitter.fabricateEvent(gsRemoveDebuffEvent);
+    } else {
+      //console.log('Gs debuff not present, fabricate applyDebuff and removeDebuff');
     }
 
-    // const gsDebuffRefreshEvent: RefreshDebuffEvent ={
-    //   type: EventType.RefreshDebuff,
-    //   source: event.source,
-    //   ability: event.ability,
-    //   timestamp: event.timestamp + 10_000,
-    //   sourceID: event.sourceID,
-    //   targetID: event.targetID!,
-    //   targetIsFriendly: false,
-    //   sourceIsFriendly: true,
-    // }
+    this.eventEmitter.fabricateEvent(gsApplyDebuffEvent);
+    this.eventEmitter.fabricateEvent(gsRemoveDebuffEvent);
   }
 
   protected applyDebuffDebug(event: ApplyDebuffEvent) {
@@ -137,6 +103,16 @@ class GhostlyStrikeEventFabricator extends Analyzer {
   protected removeDebuffDebug(event: RemoveDebuffEvent) {
     console.log(
       'REMOVE ',
+      event.ability.name,
+      ' at ',
+      this.owner.formatTimestamp(event.timestamp),
+      event,
+    );
+  }
+
+  protected refreshDebuffDebug(event: RefreshDebuffEvent) {
+    console.log(
+      'REFRESH ',
       event.ability.name,
       ' at ',
       this.owner.formatTimestamp(event.timestamp),
