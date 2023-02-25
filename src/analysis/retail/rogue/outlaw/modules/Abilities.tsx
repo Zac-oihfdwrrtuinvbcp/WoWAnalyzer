@@ -184,6 +184,13 @@ class Abilities extends CoreAbilities {
         },
         enabled: combatant.hasTalent(TALENTS.KILLING_SPREE_TALENT),
       },
+      {
+        spell: TALENTS.KEEP_IT_ROLLING_TALENT.id,
+        category: SPELL_CATEGORY.COOLDOWNS,
+        cooldown: 7 * 60,
+        gcd: null,
+        enabled: combatant.hasTalent(TALENTS.KEEP_IT_ROLLING_TALENT),
+      },
       // Defensive
       {
         spell: TALENTS.CLOAK_OF_SHADOWS_TALENT.id,
