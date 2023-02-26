@@ -21,6 +21,8 @@ class GhostlyStrikeEventFabricator extends Analyzer {
   };
   protected eventEmitter!: EventEmitter;
   protected enemies!: Enemies;
+  protected lastAppliedTimestamp = 0;
+  protected lastAppliedPandemic = 0;
 
   constructor(options: Options) {
     super(options);
@@ -52,7 +54,6 @@ class GhostlyStrikeEventFabricator extends Analyzer {
 
   protected onGhostlyStrike(event: DamageEvent) {
     const ennemy = this.enemies.getEntity(event);
-    //console.log(ennemy);
     const gsDebuff = ennemy?.getBuff(event.ability.guid, event.timestamp, event.sourceID);
     //console.log(gsDebuff);
     const gsApplyDebuffEvent: ApplyDebuffEvent = {
@@ -70,7 +71,7 @@ class GhostlyStrikeEventFabricator extends Analyzer {
       type: EventType.RemoveDebuff,
       source: event.source,
       ability: event.ability,
-      timestamp: event.timestamp + 10_000,
+      timestamp: event.timestamp + GS_DEBUFF_BASE_LENGHT,
       sourceID: event.sourceID,
       targetID: event.targetID!,
       targetIsFriendly: false,
@@ -85,7 +86,17 @@ class GhostlyStrikeEventFabricator extends Analyzer {
     } else {
       //console.log('Gs debuff not present, fabricate applyDebuff and removeDebuff');
     }
+    // const remainingTime = this.lastAppliedTimestamp + GS_DEBUFF_BASE_LENGHT - event.timestamp;
+    // if(remainingTime < 0)
+    // {
+    //   gsRemoveDebuffEvent.timestamp = this.lastAppliedTimestamp + GS_DEBUFF_BASE_LENGHT + this.lastAppliedPandemic;
+    //   this.eventEmitter.fabricateEvent(gsRemoveDebuffEvent);
+    // }
+    // else{
+    //   this.lastAppliedPandemic = Math.min(remainingTime, GS_DEBUFF_BASE_LENGHT * 0.3);;
+    // }
 
+    //this.lastAppliedTimestamp = event.timestamp;
     this.eventEmitter.fabricateEvent(gsApplyDebuffEvent);
     this.eventEmitter.fabricateEvent(gsRemoveDebuffEvent);
   }
