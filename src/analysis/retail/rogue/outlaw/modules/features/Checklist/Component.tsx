@@ -67,7 +67,7 @@ const OutlawRogueChecklist = ({
       </Rule>
       <Rule
         name="Use your finishers efficiently"
-        description={<>Finishers should typically be used at maximum or maximum -1 combo points.</>}
+        description={<>Finishers should typically be used at 1 below max combo points or higher.</>}
       >
         <Requirement name="Early finishers" thresholds={thresholds.finishers} />
         <Requirement

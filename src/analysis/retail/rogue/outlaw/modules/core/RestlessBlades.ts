@@ -26,6 +26,9 @@ const AFFECTED_ABILITIES: number[] = [
   TALENTS.BLADE_FLURRY_TALENT.id,
 ];
 
+export const RESTLESS_BLADES_BASE_CDR = 1000;
+export const TRUE_BEARING_CDR = 500;
+
 class RestlessBlades extends Analyzer {
   static dependencies = {
     spellUsable: SpellUsable,
@@ -43,10 +46,10 @@ class RestlessBlades extends Analyzer {
       return;
     }
 
-    let cdr = 1000;
-    if (this.selectedCombatant.hasBuff(SPELLS.TRUE_BEARING.id)) {
-      cdr += 500;
-    }
+    const cdr =
+      RESTLESS_BLADES_BASE_CDR +
+      (this.selectedCombatant.hasBuff(SPELLS.TRUE_BEARING.id) ? TRUE_BEARING_CDR : 0);
+
     const amount = cdr * spent;
 
     AFFECTED_ABILITIES.forEach((spell) => this.reduceCooldown(spell, amount));

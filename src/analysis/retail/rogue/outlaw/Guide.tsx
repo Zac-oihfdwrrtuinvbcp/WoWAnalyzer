@@ -2,30 +2,25 @@ import { GuideProps, Section, SubSection } from 'interface/guide';
 import PreparationSection from 'interface/guide/components/Preparation/PreparationSection';
 import { t, Trans } from '@lingui/macro';
 import EnergyCapWaste from 'analysis/retail/rogue/shared/guide/EnergyCapWaste';
-//import TALENTS from 'common/TALENTS/rogue';
-//import HideExplanationsToggle from 'interface/guide/components/HideExplanationsToggle';
-import { ResourceLink, SpellLink } from 'interface';
-//import SPELLS from 'common/SPELLS';
+import TALENTS from 'common/TALENTS/rogue';
+import { ResourceLink } from 'interface';
 import { RoundedPanel, SideBySidePanels } from 'interface/guide/components/GuideDivs';
-//import CooldownUsage from 'parser/core/MajorCooldowns/CooldownUsage';
 import RESOURCE_TYPES from 'game/RESOURCE_TYPES';
-
 import CombatLogParser from './CombatLogParser';
 import { AplSectionData } from 'interface/guide/components/Apl';
 import * as AplCheck from './modules/AplCheck';
-import { TALENTS_ROGUE } from 'common/TALENTS';
 
 export default function Guide({ modules, events, info }: GuideProps<typeof CombatLogParser>) {
   return (
     <>
       <ResourceUsageSection modules={modules} events={events} info={info} />
-      <AcionPriorityList modules={modules} events={events} info={info} />
+      <ActionPriorityList modules={modules} events={events} info={info} />
       <PreparationSection />
     </>
   );
 }
 
-function ResourceUsageSection({ modules }: GuideProps<typeof CombatLogParser>) {
+function ResourceUsageSection({ modules, info }: GuideProps<typeof CombatLogParser>) {
   const percentAtCap = modules.energyTracker.percentAtCap;
   const energyWasted = modules.energyTracker.wasted;
 
@@ -62,14 +57,7 @@ function ResourceUsageSection({ modules }: GuideProps<typeof CombatLogParser>) {
         />
         {modules.energyGraph.plot}
         <p></p>
-        <p>
-          <Trans id="guide.rogue.outlaw.sections.resources.energy.BRandKS">
-            -- WIP section -- This will highlight{' '}
-            <SpellLink id={TALENTS_ROGUE.BLADE_RUSH_TALENT.id} />
-            and <SpellLink id={TALENTS_ROGUE.KILLING_SPREE_TALENT.id} />
-            usage when talented as we primarly use both these spells for energy efficiency.
-          </Trans>
-        </p>
+        {info.combatant.hasTalent(TALENTS.BLADE_RUSH_TALENT) && modules.bladeRush.guide}
       </SubSection>
       <SubSection
         title={t({
@@ -91,7 +79,7 @@ function ResourceUsageSection({ modules }: GuideProps<typeof CombatLogParser>) {
         <p></p>
         <p>
           <Trans id="guide.rogue.outlaw.sections.resources.comboPoints.buildersBreakdown">
-            -- WIP section -- Maybe highlight which builders the user is commonly overcapping with.
+            -- WIP section -- Higlight which builders the user is commonly overcapping with.
           </Trans>
         </p>
       </SubSection>
@@ -99,7 +87,7 @@ function ResourceUsageSection({ modules }: GuideProps<typeof CombatLogParser>) {
   );
 }
 
-function AcionPriorityList({ modules, info }: GuideProps<typeof CombatLogParser>) {
+function ActionPriorityList({ modules, info }: GuideProps<typeof CombatLogParser>) {
   return (
     <Section title="Acion Priority List">
       <p>Outlaw rogue rotation is driven by a priority list.</p>

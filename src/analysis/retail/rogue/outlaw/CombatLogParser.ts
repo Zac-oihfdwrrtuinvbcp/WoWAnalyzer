@@ -40,12 +40,11 @@ import BladeRush from './modules/talents/BladeRush';
 import InvigoratingShadowdust from 'analysis/retail/rogue/shared/shadowlands/legendaries/InvigoratingShadowdust';
 import Audacity from './modules/spells/Audacity';
 import AudacityDamageTracker from './modules/spells/AudacityDamageTracker';
+import FanTheHammerNormalizer from './normalizers/FanTheHammerNormalizer';
 import Guide from './Guide';
 import BuilderUse from './modules/core/BuilderUse';
 import FinisherUse from './modules/core/FinisherUse';
-import FanTheHammerNormalizer from './normalizers/FanTheHammerNormalizer';
 import AplCheck from './modules/AplCheck';
-//import CastLinkNormalizer from './normalizers/CastLinkNormalizer';
 
 class CombatLogParser extends CoreCombatLogParser {
   static specModules = {
@@ -57,7 +56,7 @@ class CombatLogParser extends CoreCombatLogParser {
     checklist: Checklist,
 
     //Normalizers
-    //castLinkNormalizer: CastLinkNormalizer,
+    fanTheHammerNormalizer: FanTheHammerNormalizer,
 
     //Resource
     comboPointTracker: OutlawComboPointTracker,
@@ -103,9 +102,6 @@ class CombatLogParser extends CoreCombatLogParser {
     flagellation: Flagellation,
     sepsis: Sepsis,
     stealthAbilityFollowingSepsis: StealthAbilityFollowingSepsis,
-
-    //Normalizers
-    fanTheHammerNormalizer: FanTheHammerNormalizer,
 
     // Outlaw's throughput benefit isn't as big as for other classes since we don't have a lot of free gcds to use
     arcaneTorrent: [
