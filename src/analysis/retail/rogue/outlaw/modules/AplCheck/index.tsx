@@ -32,6 +32,7 @@ import { buffsCount } from './buffsCount';
 //import Finishers from '../features/Finishers'
 
 //--TODO: Figure out pandemic thingy for GS and BTE
+//        figuere out the optional condition
 
 const hasFinisherCondition = () => {
   //             this should be using: finishers.recommendedFinisherPoints()
@@ -71,7 +72,7 @@ const COMMON_COOLDOWN: Rule[] = [
   },
   {
     spell: TALENTS.KILLING_SPREE_TALENT,
-    condition: describe(hasResource(RESOURCE_TYPES.ENERGY, { atMost: 30 }), (tense) => (
+    condition: describe(hasResource(RESOURCE_TYPES.ENERGY, { atMost: 50 }), (tense) => (
       <>you {tenseAlt(tense, 'are', 'were')} under ~50/60 energy</>
     )),
   },
@@ -100,8 +101,6 @@ const COMMON_COOLDOWN: Rule[] = [
       and(
         buffMissing(SPELLS.AUDACITY_TALENT_BUFF),
         buffMissing(SPELLS.OPPORTUNITY),
-        //I don't think the inverse part of this function work correclty, not sure how to update tho
-        //spellAvailable(SPELLS.VANISH, true),
         notInStealthCondition(),
         optional(not(hasFinisherCondition())),
       ),
@@ -125,6 +124,7 @@ const COMMON_FINISHER: Rule[] = [
         duration: 21000,
         pandemicCap: 4,
       }),
+      //NOT WORKING
       //optional(buffMissing(SPELLS.SHADOW_DANCE_BUFF),),
     ),
   },
