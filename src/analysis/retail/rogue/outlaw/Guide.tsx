@@ -126,6 +126,22 @@ function CoreRotationSection({ modules }: GuideProps<typeof CombatLogParser>) {
     >
       <SubSection
         title={t({
+          id: 'guide.rogue.outlaw.sections.coreRotation.buffsUptimes.title',
+          message: 'Buffs Uptimes',
+        })}
+      >
+        <p>
+          <Trans id="guide.rogue.outlaw.sections.coreRotation.buffsUptimes.summary">
+            You should aim to have as close to possible to 100% uptime on your maintainance buff (
+            <SpellLink id={TALENTS.ROLL_THE_BONES_TALENT} />,{' '}
+            <SpellLink id={SPELLS.SLICE_AND_DICE} />, <SpellLink id={SPELLS.BETWEEN_THE_EYES} />
+            ).
+          </Trans>
+        </p>
+      </SubSection>
+
+      <SubSection
+        title={t({
           id: 'guide.rogue.outlaw.sections.coreRotation.finishers.title',
           message: 'Finishers',
         })}
