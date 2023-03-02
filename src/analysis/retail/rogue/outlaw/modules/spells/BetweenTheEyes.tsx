@@ -3,7 +3,12 @@ import { formatNumber, formatPercentage } from 'common/format';
 import SPELLS from 'common/SPELLS';
 import { SpellLink } from 'interface';
 import Analyzer, { Options, SELECTED_PLAYER } from 'parser/core/Analyzer';
-import Events, { UpdateSpellUsableEvent, UpdateSpellUsableType } from 'parser/core/Events';
+import Events, {
+  ApplyDebuffEvent,
+  RemoveDebuffEvent,
+  UpdateSpellUsableEvent,
+  UpdateSpellUsableType,
+} from 'parser/core/Events';
 import { NumberThreshold, ThresholdStyle, When } from 'parser/core/ParseResults';
 import SpellUsable from 'parser/shared/modules/SpellUsable';
 import BoringSpellValueText from 'parser/ui/BoringSpellValueText';
@@ -30,6 +35,16 @@ class BetweenTheEyes extends Analyzer {
       Events.UpdateSpellUsable.by(SELECTED_PLAYER).spell(SPELLS.BETWEEN_THE_EYES),
       this.onBetweenTheEyesUsable,
     );
+
+    this.addEventListener(
+      Events.applydebuff.by(SELECTED_PLAYER).spell(SPELLS.BETWEEN_THE_EYES),
+      this.onBtEApplied,
+    );
+
+    this.addEventListener(
+      Events.removedebuff.by(SELECTED_PLAYER).spell(SPELLS.BETWEEN_THE_EYES),
+      this.onBtERemoved,
+    );
   }
 
   onBetweenTheEyesUsable(event: UpdateSpellUsableEvent) {
@@ -48,6 +63,15 @@ class BetweenTheEyes extends Analyzer {
         break;
       }
     }
+  }
+
+  onBtEApplied(event: ApplyDebuffEvent) {
+    console.log(this.owner.fight.start_time);
+    console.log('Bte applied at: ', this.owner.formatTimestamp(event.timestamp));
+  }
+
+  onBtERemoved(event: RemoveDebuffEvent) {
+    console.log('Bte removed at: ', this.owner.formatTimestamp(event.timestamp));
   }
 
   // Thresholds get retrieved at the end of analyzing

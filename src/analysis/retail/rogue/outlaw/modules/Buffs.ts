@@ -42,25 +42,30 @@ class Buffs extends CoreAuras {
       // Roll the Bones
       {
         spellId: TALENTS.ROLL_THE_BONES_TALENT.id,
-        timelineHighlight: true,
+        timelineHighlight: false,
       },
       {
         spellId: SPELLS.RUTHLESS_PRECISION.id,
+        timelineHighlight: true,
       },
       {
         spellId: SPELLS.GRAND_MELEE.id,
       },
       {
         spellId: SPELLS.BROADSIDE.id,
+        timelineHighlight: true,
       },
       {
         spellId: SPELLS.SKULL_AND_CROSSBONES.id,
+        timelineHighlight: true,
       },
       {
         spellId: SPELLS.BURIED_TREASURE.id,
+        timelineHighlight: true,
       },
       {
         spellId: SPELLS.TRUE_BEARING.id,
+        timelineHighlight: true,
       },
 
       // Misc

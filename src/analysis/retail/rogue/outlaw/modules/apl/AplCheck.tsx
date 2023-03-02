@@ -14,20 +14,21 @@ import {
   and,
   buffMissing,
   buffPresent,
-  debuffMissing,
+  //debuffMissing,
   hasResource,
   or,
   describe,
   buffStacks,
-  not,
+  //not,
   optional,
 } from 'parser/shared/metrics/apl/conditions';
 
 import { AnyEvent } from 'parser/core/Events';
 import RESOURCE_TYPES from 'game/RESOURCE_TYPES';
 import { SpellLink } from 'interface';
-import { ROLL_THE_BONES_BUFFS } from '../../constants';
-import { buffsCount } from './buffsCount';
+//import { ROLL_THE_BONES_BUFFS } from '../../constants';
+//import { buffsCount } from './buffsCount';
+import { tempDebuffMissing } from './tempDebuffMissing';
 
 //--TODO: Figure out pandemic thing for GS and BTE
 //        Figure out 'optional' conditions
@@ -49,12 +50,13 @@ const energyCondition = (minEnergyThreshold: number, maxEnergyThreshold: number)
 
 //  if snc is down and rtbBuffCount < 2 should reroll
 const rtbCondition = () => {
-  const rtbBuffsToCheck = ROLL_THE_BONES_BUFFS.filter((spell) => spell !== SPELLS.GRAND_MELEE);
+  //const rtbBuffsToCheck = ROLL_THE_BONES_BUFFS.filter((spell) => spell !== SPELLS.GRAND_MELEE);
+  console.log(optional(buffMissing(SPELLS.BURIED_TREASURE)));
   return and(
     buffMissing(SPELLS.SKULL_AND_CROSSBONES),
     // Adding this make it stop working
-    //optional(buffMissing(SPELLS.BURIED_TREASURE)),
-    buffsCount(rtbBuffsToCheck, 2, 'lessThan'),
+    optional(buffMissing(SPELLS.BURIED_TREASURE)),
+    //buffsCount(rtbBuffsToCheck, 2, 'lessThan'),
   );
 };
 
@@ -105,7 +107,7 @@ const COMMON_COOLDOWN: Rule[] = [
         </>
       )),
       notInStealthCondition(),
-      optional(not(hasFinisherCondition())),
+      //optional(not(hasFinisherCondition())),
     ),
   },
   {
@@ -115,7 +117,7 @@ const COMMON_COOLDOWN: Rule[] = [
         buffMissing(SPELLS.AUDACITY_TALENT_BUFF),
         buffMissing(SPELLS.OPPORTUNITY),
         notInStealthCondition(),
-        optional(not(hasFinisherCondition())),
+        //optional(not(hasFinisherCondition())),
       ),
       (tense) => (
         <>
@@ -132,11 +134,7 @@ const COMMON_FINISHER: Rule[] = [
     spell: SPELLS.BETWEEN_THE_EYES,
     condition: and(
       hasFinisherCondition(),
-      debuffMissing(SPELLS.BETWEEN_THE_EYES, {
-        timeRemaining: 4000,
-        duration: 21000,
-        pandemicCap: 1,
-      }),
+      tempDebuffMissing(SPELLS.BETWEEN_THE_EYES),
       //NOT WORKING
       //optional(buffMissing(SPELLS.SHADOW_DANCE_BUFF),),
     ),
