@@ -49,18 +49,25 @@ export function debuffMissing(
     init: () => null,
     update: (state, event) => {
       switch (event.type) {
+        case EventType.RefreshDebuff:
         case EventType.ApplyDebuff:
           if (event.ability.guid === spell.id) {
             const encodedTargetString = encodeTargetString(
               event.targetID,
-              event.targetInstance ?? 1,
+              event.targetInstance ?? 0,
             );
+            let timeRemaining = 0;
+
             if (!state) {
               state = {};
+            } else if (state[encodedTargetString]) {
+              const timeElapsed = event.timestamp - state[encodedTargetString].referenceTime;
+              timeRemaining = state[encodedTargetString].timeRemaining - timeElapsed;
             }
+
             state[encodedTargetString] = {
               referenceTime: event.timestamp,
-              timeRemaining: buffDuration(state[encodedTargetString]?.timeRemaining, pandemic),
+              timeRemaining: buffDuration(timeRemaining, pandemic),
             };
 
             return state;
@@ -70,7 +77,7 @@ export function debuffMissing(
           if (event.ability.guid === spell.id) {
             const encodedTargetString = encodeTargetString(
               event.targetID,
-              event.targetInstance ?? 1,
+              event.targetInstance ?? 0,
             );
             if (!state) {
               state = {};
