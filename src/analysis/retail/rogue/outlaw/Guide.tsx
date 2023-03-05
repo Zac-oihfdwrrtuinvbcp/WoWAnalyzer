@@ -133,15 +133,7 @@ function CoreRotationSection({ modules }: GuideProps<typeof CombatLogParser>) {
           </Trans>
         </p>
       </SubSection>
-
-      <SubSection
-        title={t({
-          id: 'guide.rogue.outlaw.sections.coreRotation.finishers.title',
-          message: 'Finishers',
-        })}
-      >
-        {modules.finisherUse.guide}
-      </SubSection>
+      {modules.finisherUse.guide}
 
       <SubSection
         title={t({

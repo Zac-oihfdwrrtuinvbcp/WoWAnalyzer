@@ -30,6 +30,9 @@ class Buffs extends CoreAuras {
       {
         spellId: TALENTS.ALACRITY_TALENT.id,
       },
+      {
+        spellId: TALENTS.GREENSKINS_WICKERS_TALENT.id,
+      },
 
       // Roll the Bones
       {
