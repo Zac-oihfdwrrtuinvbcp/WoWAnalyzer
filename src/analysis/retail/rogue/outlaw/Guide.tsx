@@ -14,6 +14,7 @@ export default function Guide({ modules, events, info }: GuideProps<typeof Comba
   return (
     <>
       <ResourceUsageSection modules={modules} events={events} info={info} />
+      {modules.finisherUse.guide}
       <ActionPriorityList modules={modules} events={events} info={info} />
       <PreparationSection />
     </>
