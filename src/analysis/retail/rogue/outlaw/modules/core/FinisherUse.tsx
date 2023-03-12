@@ -18,12 +18,11 @@ import { combineQualitativePerformances } from 'common/combineQualitativePerform
 import SpellUsageSubSection from 'parser/core/SpellUsage/SpellUsageSubSection';
 import { formatDurationMillisMinSec } from 'common/format';
 
-//-- TODO: Verify that greenskin wickers buff id is correct
-//         Update the display to the thing assassination uses as this is a bit messy to read
-//    User has slice and dice prepull??
-
 const BTE_ACCEPTABLE_REFRESH_TIME = 6000;
 const BTE_FLAG_REFRESH_TIME = 4000;
+
+//-- TODO: Add a slice and dice module to track buff remaining duration, not really necessary as of now since we barely press the spell
+//         Find a log that actually plays with improved between the eyes to check if everything is correct
 
 export default class FinisherUse extends Analyzer {
   static dependencies = {
@@ -87,6 +86,8 @@ export default class FinisherUse extends Analyzer {
       return;
     }
 
+    //- CP performance
+
     const targetCps = this.finishers.recommendedFinisherPoints();
     let cpsPerformance = QualitativePerformance.Good;
     let cpsSummary: ReactNode;
@@ -109,145 +110,155 @@ export default class FinisherUse extends Analyzer {
       cpsDetails = <div>You spent {cpsSpent} CPs.</div>;
     }
 
-    const hasRuthlessPrecisionBuff = this.selectedCombatant.hasBuff(SPELLS.RUTHLESS_PRECISION.id);
-    const hasGreenskinBuff = this.selectedCombatant.hasBuff(
-      TALENTS_ROGUE.GREENSKINS_WICKERS_TALENT.id,
-    );
-    const hasShadowDanceBuff = this.selectedCombatant.hasBuff(SPELLS.SHADOW_DANCE_BUFF.id);
-    const bteRemainingTime = this.betweenTheEyes.getTimeRemaining(event as TargettedEvent<any>);
+    //- Finisher choice performance
+    const checklistFinisherChoice: ChecklistUsageInfo = {
+      check: 'finisher choice',
+      timestamp: event.timestamp,
+      performance: QualitativePerformance.Good,
+      summary: <></>,
+      details: (
+        <>
+          You cast <SpellLink id={spellId} />{' '}
+        </>
+      ),
+    };
 
-    let finisherChoicePerformance = QualitativePerformance.Good;
-    let finisherChoiceSummary = (
-      <div>Between the eyes debuff was up and slice and dice buff was up</div>
+    const bteDebuffRemainingTime = this.betweenTheEyes.getTimeRemaining(
+      event as TargettedEvent<any>,
     );
-    let finisherChoiceDetails = <div> You cast {event.ability.name}</div>;
+    const bteCDRemainingTime = this.spellUsable.cooldownRemaining(SPELLS.BETWEEN_THE_EYES.id);
+    const hasSnD = this.selectedCombatant.getBuff(
+      SPELLS.SLICE_AND_DICE.id,
+      event.timestamp,
+      0,
+      200,
+    );
 
-    if (
-      this.spellUsable.isAvailable(SPELLS.BETWEEN_THE_EYES.id) &&
-      spellId !== SPELLS.BETWEEN_THE_EYES.id
-    ) {
-      if (this.hasGreenskinTalent) {
-        if (!hasGreenskinBuff) {
-          finisherChoicePerformance = QualitativePerformance.Fail;
-          finisherChoiceSummary = <div>Between the eyes was ready</div>;
-          finisherChoiceDetails = (
-            <>
-              {finisherChoiceDetails} with <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> off
-              cooldown, when talented into{' '}
-              <SpellLink id={TALENTS_ROGUE.GREENSKINS_WICKERS_TALENT.id} /> you should try to press{' '}
-              <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> as much on cd as possible.
-            </>
-          );
-        }
-      } else {
-        if (hasRuthlessPrecisionBuff && this.hasImprovedBteTalent) {
-          finisherChoicePerformance = QualitativePerformance.Fail;
-          finisherChoiceSummary = <div>Between the eyes was ready</div>;
-          finisherChoiceDetails = (
-            <>
-              {finisherChoiceDetails} with <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> off
-              cooldown, when talented into{' '}
-              <SpellLink id={TALENTS_ROGUE.IMPROVED_BETWEEN_THE_EYES_TALENT.id} /> try to press{' '}
-              <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> on cooldown with{' '}
-              <SpellLink id={SPELLS.RUTHLESS_PRECISION.id} /> buff up.
-            </>
-          );
-        } else if (bteRemainingTime === 0 && !hasShadowDanceBuff && this.hasCountTheOddsTalent) {
-          finisherChoicePerformance = QualitativePerformance.Fail;
-          finisherChoiceSummary = <div>Between the eyes debuff was missing from the target</div>;
-          finisherChoiceDetails = (
-            <>
-              {finisherChoiceDetails} with <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> off
-              cooldown, never let
-              <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> debuff fall off.
-            </>
-          );
-        } else if (
-          bteRemainingTime <= BTE_FLAG_REFRESH_TIME &&
-          !hasShadowDanceBuff &&
-          this.hasCountTheOddsTalent
-        ) {
-          finisherChoicePerformance = QualitativePerformance.Ok;
-          finisherChoiceSummary = <div>Time remaining on betweenTheEyes: {bteRemainingTime}</div>;
-          finisherChoiceDetails = (
-            <>
-              {finisherChoiceDetails} with <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> off
-              cooldown, try to refresh
-              <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> debuff early to not let it fall off.
-            </>
-          );
-        }
-      }
-    } else if (spellId === SPELLS.BETWEEN_THE_EYES.id) {
-      if (this.hasGreenskinTalent) {
-        if (hasGreenskinBuff) {
-          finisherChoicePerformance = QualitativePerformance.Fail;
-          finisherChoiceSummary = <div>Greenskin Wickers buff was already present</div>;
-          finisherChoiceDetails = (
-            <>
-              {finisherChoiceDetails} with a{' '}
-              <SpellLink id={TALENTS_ROGUE.GREENSKINS_WICKERS_TALENT.id} /> buff, try to not
-              override your <SpellLink id={TALENTS_ROGUE.GREENSKINS_WICKERS_TALENT.id} /> buffs.
-            </>
-          );
-        }
-      } else if (bteRemainingTime > BTE_ACCEPTABLE_REFRESH_TIME && this.hasCountTheOddsTalent) {
-        finisherChoicePerformance = QualitativePerformance.Ok;
-        finisherChoiceSummary = (
-          <div>
-            Time left on Between the Eyes debuff: {formatDurationMillisMinSec(bteRemainingTime)}{' '}
-          </div>
-        );
-        finisherChoiceDetails = (
-          <div>
-            You used <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> with{' '}
-            {formatDurationMillisMinSec(bteRemainingTime)} left on the debuff, since you aren't
-            playing <SpellLink id={TALENTS_ROGUE.GREENSKINS_WICKERS_TALENT.id} /> talent, you do not
-            need to refresh it's debuff this early, try to instead keep the cooldown ready in case
-            of target swapping for example. Refreshing the debuff early before a{' '}
-            <SpellLink id={TALENTS_ROGUE.SHADOW_DANCE_TALENT.id} /> window is however fine.
-          </div>
-        );
-      }
-    } else if (
-      !this.selectedCombatant.hasBuff(SPELLS.SLICE_AND_DICE.id) &&
-      spellId !== SPELLS.SLICE_AND_DICE.id &&
-      !this.selectedCombatant.hasBuff(SPELLS.GRAND_MELEE.id)
-    ) {
-      finisherChoicePerformance = QualitativePerformance.Fail;
-      finisherChoiceSummary = (
+    if (this.hasGreenskinTalent) {
+      checklistFinisherChoice.summary = (
         <div>
-          Between the eyes debuff was present on the target and slice and dice buff was missing
+          Time remaining on between the eyes cooldown:{' '}
+          {formatDurationMillisMinSec(bteCDRemainingTime)}
         </div>
       );
-      finisherChoiceDetails = (
-        <>
-          {finisherChoiceDetails} with <SpellLink id={SPELLS.SLICE_AND_DICE.id} /> buff down, try to
-          maintain
-          <SpellLink id={SPELLS.SLICE_AND_DICE.id} /> buff at all time.
-        </>
+    } else {
+      checklistFinisherChoice.summary = (
+        <div>
+          Time remaining on between the eyes debuff:{' '}
+          {formatDurationMillisMinSec(bteDebuffRemainingTime)}
+        </div>
       );
-    } else if (spellId === SPELLS.SLICE_AND_DICE.id) {
-      if (!this.selectedCombatant.hasBuff(SPELLS.SLICE_AND_DICE.id, event.timestamp, 0, 300)) {
-        finisherChoiceSummary = (
-          <div>
-            Between the eyes debuff was present on the target and you had no slice and dice buff
-            running
-          </div>
-        );
-      } else {
-        finisherChoiceSummary = <div>snd</div>;
-      }
+    }
+
+    switch (spellId) {
+      case SPELLS.BETWEEN_THE_EYES.id:
+        {
+          const hasGreenskinBuff = this.selectedCombatant.hasBuff(
+            TALENTS_ROGUE.GREENSKINS_WICKERS_TALENT.id,
+          );
+
+          if (this.hasGreenskinTalent) {
+            if (hasGreenskinBuff) {
+              checklistFinisherChoice.performance = QualitativePerformance.Ok;
+              checklistFinisherChoice.summary = (
+                <div>Greenskin Wickers buff was already present</div>
+              );
+              checklistFinisherChoice.details = (
+                <div>
+                  You used <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> with a{' '}
+                  <SpellLink id={TALENTS_ROGUE.GREENSKINS_WICKERS_TALENT.id} /> buff already
+                  present, try to not override your{' '}
+                  <SpellLink id={TALENTS_ROGUE.GREENSKINS_WICKERS_TALENT.id} /> buffs.
+                </div>
+              );
+            } else {
+              checklistFinisherChoice.summary = <div>Between the eyes used</div>;
+              checklistFinisherChoice.details = (
+                <div>
+                  You used <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> and gained a{' '}
+                  <SpellLink id={TALENTS_ROGUE.GREENSKINS_WICKERS_TALENT.id} /> buff.
+                </div>
+              );
+            }
+          } else if (
+            bteDebuffRemainingTime > BTE_ACCEPTABLE_REFRESH_TIME &&
+            !this.hasImprovedBteTalent
+          ) {
+            checklistFinisherChoice.performance = QualitativePerformance.Ok;
+            checklistFinisherChoice.details = (
+              <div>
+                You used <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> with{' '}
+                {formatDurationMillisMinSec(bteDebuffRemainingTime)} left on the debuff, since you
+                aren't playing <SpellLink id={TALENTS_ROGUE.GREENSKINS_WICKERS_TALENT.id} /> talent,
+                you do not need to refresh the debuff this early, try to instead keep the cooldown
+                ready in case of target swapping for example. Refreshing the debuff early before a{' '}
+                <SpellLink id={TALENTS_ROGUE.SHADOW_DANCE_TALENT.id} /> window is however fine.
+              </div>
+            );
+          } else if (bteDebuffRemainingTime === 0) {
+            checklistFinisherChoice.summary = <div>Between the eyes debuff applied</div>;
+            checklistFinisherChoice.details = (
+              <div>
+                You applied <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> debuff.
+              </div>
+            );
+          } else {
+            checklistFinisherChoice.details = (
+              <div>
+                You used <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> with{' '}
+                {formatDurationMillisMinSec(bteDebuffRemainingTime)} left on the debuff.
+              </div>
+            );
+          }
+        }
+        break;
+      case SPELLS.SLICE_AND_DICE.id:
+        // Add SnD remaining time here
+        checklistFinisherChoice.details = <div>{checklistFinisherChoice.details}.</div>;
+
+        if (!this.bteCondition(event, checklistFinisherChoice)) {
+          if (!hasSnD) {
+            checklistFinisherChoice.summary = <div>No slice and dice buff running</div>;
+          }
+        }
+        break;
+      case SPELLS.DISPATCH.id:
+        if (!this.bteCondition(event, checklistFinisherChoice)) {
+          if (!hasSnD && !this.selectedCombatant.hasBuff(SPELLS.GRAND_MELEE.id)) {
+            checklistFinisherChoice.performance = QualitativePerformance.Fail;
+            checklistFinisherChoice.summary = <div>Slice and dice buff was missing</div>;
+            checklistFinisherChoice.details = (
+              <div>
+                {checklistFinisherChoice.details} with <SpellLink id={SPELLS.SLICE_AND_DICE.id} />{' '}
+                buff down, try to maintain the buff at all time.
+              </div>
+            );
+          } else if (this.hasGreenskinTalent) {
+            checklistFinisherChoice.details = (
+              <div>
+                {checklistFinisherChoice.details} with{' '}
+                {formatDurationMillisMinSec(bteCDRemainingTime)} left on{' '}
+                <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> cooldown.
+              </div>
+            );
+          } else {
+            checklistFinisherChoice.details = (
+              <div>
+                {checklistFinisherChoice.details} with{' '}
+                {formatDurationMillisMinSec(bteDebuffRemainingTime)} left on{' '}
+                <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> debuff.
+              </div>
+            );
+          }
+        }
+        break;
+      default:
+        checklistFinisherChoice.details = <div>{checklistFinisherChoice.details}.</div>;
+        break;
     }
 
     const checklistItems: ChecklistUsageInfo[] = [
-      {
-        check: 'finisher choice',
-        timestamp: event.timestamp,
-        performance: finisherChoicePerformance,
-        summary: finisherChoiceSummary,
-        details: finisherChoiceDetails,
-      },
+      checklistFinisherChoice,
       {
         check: 'cps',
         timestamp: event.timestamp,
@@ -276,12 +287,12 @@ export default class FinisherUse extends Analyzer {
         <SpellLink id={SPELLS.BETWEEN_THE_EYES} /> and <SpellLink id={SPELLS.SLICE_AND_DICE} />{' '}
         buff.
         {this.hasGreenskinTalent && (
-          <>
+          <p>
             {' '}
             Since you are talented into <SpellLink id={TALENTS.GREENSKINS_WICKERS_TALENT} /> you
             will want to cast <SpellLink id={SPELLS.BETWEEN_THE_EYES} /> as close to on cd as
             possible to maximise the proc uptime.
-          </>
+          </p>
         )}
       </p>
     );
@@ -300,5 +311,85 @@ export default class FinisherUse extends Analyzer {
         }
       />
     );
+  }
+
+  private bteCondition(event: CastEvent, checkListFinisher: ChecklistUsageInfo): boolean {
+    const wasBtEReady = this.spellUsable.isAvailable(SPELLS.BETWEEN_THE_EYES.id);
+
+    if (!wasBtEReady) {
+      return false;
+    }
+
+    const hasRuthlessPrecisionBuff = this.selectedCombatant.hasBuff(SPELLS.RUTHLESS_PRECISION.id);
+    const hasGreenskinBuff = this.selectedCombatant.hasBuff(
+      TALENTS_ROGUE.GREENSKINS_WICKERS_TALENT.id,
+    );
+    const hasShadowDanceBuff = this.selectedCombatant.hasBuff(SPELLS.SHADOW_DANCE_BUFF.id);
+    const bteRemainingTime = this.betweenTheEyes.getTimeRemaining(event as TargettedEvent<any>);
+
+    if (this.hasGreenskinTalent && !hasGreenskinBuff) {
+      checkListFinisher.performance = QualitativePerformance.Fail;
+      checkListFinisher.summary = <div>Between the eyes was ready</div>;
+      checkListFinisher.details = (
+        <div>
+          {checkListFinisher.details} with <SpellLink id={SPELLS.BETWEEN_THE_EYES} /> off cooldown,
+          when talented into <SpellLink id={TALENTS_ROGUE.GREENSKINS_WICKERS_TALENT} /> you should
+          try to use <SpellLink id={SPELLS.BETWEEN_THE_EYES} /> as much on cd as possible.
+        </div>
+      );
+      return true;
+    }
+
+    if (this.hasCountTheOddsTalent && hasShadowDanceBuff) {
+      return false;
+    }
+
+    if (this.hasImprovedBteTalent && hasRuthlessPrecisionBuff) {
+      checkListFinisher.performance = QualitativePerformance.Fail;
+      checkListFinisher.summary = <div>Between the eyes was ready</div>;
+      checkListFinisher.details = (
+        <div>
+          {checkListFinisher.details} with <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> off
+          cooldown, when talented into{' '}
+          <SpellLink id={TALENTS_ROGUE.IMPROVED_BETWEEN_THE_EYES_TALENT.id} /> try to use{' '}
+          <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> on cooldown with{' '}
+          <SpellLink id={SPELLS.RUTHLESS_PRECISION.id} /> buff up.
+        </div>
+      );
+      return true;
+    }
+
+    if (!bteRemainingTime) {
+      checkListFinisher.performance = QualitativePerformance.Fail;
+      checkListFinisher.summary = <div>Between the eyes debuff was missing from the target</div>;
+      checkListFinisher.details = (
+        <div>
+          {checkListFinisher.details} with no <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> debuff
+          up and the spell ready to use, never let <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} />{' '}
+          debuff fall off.
+        </div>
+      );
+      return true;
+    }
+
+    if (bteRemainingTime < BTE_FLAG_REFRESH_TIME) {
+      checkListFinisher.performance = QualitativePerformance.Ok;
+      checkListFinisher.summary = (
+        <div>
+          Time remaining on between the eyes: {formatDurationMillisMinSec(bteRemainingTime)}
+        </div>
+      );
+      checkListFinisher.details = (
+        <div>
+          You cast <SpellLink id={SPELLS.DISPATCH.id} /> with{' '}
+          <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> off cooldown and{' '}
+          {formatDurationMillisMinSec(bteRemainingTime)} left on its debuff, try to refresh{' '}
+          <SpellLink id={SPELLS.BETWEEN_THE_EYES.id} /> debuff early to not let it fall off.
+        </div>
+      );
+      return true;
+    }
+
+    return false;
   }
 }
