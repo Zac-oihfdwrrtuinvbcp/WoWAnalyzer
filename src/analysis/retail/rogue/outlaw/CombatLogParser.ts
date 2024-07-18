@@ -40,8 +40,9 @@ import BladeRush from './modules/talents/BladeRush';
 import InvigoratingShadowdust from 'analysis/retail/rogue/shared/shadowlands/legendaries/InvigoratingShadowdust';
 import Audacity from './modules/spells/Audacity';
 import AudacityDamageTracker from './modules/spells/AudacityDamageTracker';
-import FanTheHammerNormalizer from './normalizers/FanTheHammerNormalizer';
-import DispatchCrackshotNormalizer from './normalizers/DispatchCrackshotNormalizer';
+//import FanTheHammerNormalizer from './normalizers/FanTheHammerNormalizer';
+import GlobalCooldown from './modules/core/GlobalCooldown';
+//import DispatchCrackshotNormalizer from './normalizers/DispatchCrackshotNormalizer';
 import Guide from './Guide';
 import BuilderUse from './modules/core/BuilderUse';
 import FinisherUse from './modules/core/FinisherUse';
@@ -59,8 +60,8 @@ class CombatLogParser extends CoreCombatLogParser {
     //Normalizers
     castLinkNormalizer: CastLinkNormalizer,
     thistleTeaCastLinkNormalizer: ThistleTeaCastLinkNormalizer,
-    fanTheHammerNormalizer: FanTheHammerNormalizer,
-    dispatchCrackshotNormalizer: DispatchCrackshotNormalizer,
+    //fanTheHammerNormalizer: FanTheHammerNormalizer,
+    //dispatchCrackshotNormalizer: DispatchCrackshotNormalizer,
 
     //Resource
     comboPointTracker: OutlawComboPointTracker,
@@ -77,6 +78,7 @@ class CombatLogParser extends CoreCombatLogParser {
     // Core
     builderUse: BuilderUse,
     finisherUse: FinisherUse,
+    globalCooldown: GlobalCooldown,
 
     //Legendaries
     invigoratingShadowdust: InvigoratingShadowdust,
