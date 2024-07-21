@@ -48,6 +48,7 @@ import BuilderUse from './modules/core/BuilderUse';
 import FinisherUse from './modules/core/FinisherUse';
 import AplCheck from './modules/apl/AplCheck';
 import CastLinkNormalizer from './normalizers/CastLinkNormalizer';
+import Crackshot from './modules/core/Crackshot';
 
 class CombatLogParser extends CoreCombatLogParser {
   static specModules = {
@@ -87,6 +88,7 @@ class CombatLogParser extends CoreCombatLogParser {
     restlessBlades: RestlessBlades,
     rollTheBonesCastTracker: RollTheBonesCastTracker,
     instantPoison: InstantPoison,
+    Crackshot: Crackshot,
 
     //Casts
     dispatch: Dispatch,
