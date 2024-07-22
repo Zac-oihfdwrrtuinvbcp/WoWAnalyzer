@@ -10,6 +10,7 @@ import RESOURCE_TYPES from 'game/RESOURCE_TYPES';
 import CombatLogParser from './CombatLogParser';
 import { AplSectionData } from 'interface/guide/components/Apl';
 import * as AplCheck from './modules/apl/AplCheck';
+import OutlawAplSummary from './modules/apl/OutlawAplSummary';
 
 export default function Guide({ modules, events, info }: GuideProps<typeof CombatLogParser>) {
   return (
@@ -122,7 +123,9 @@ function ActionPriorityList({ modules, info }: GuideProps<typeof CombatLogParser
         </a>
         .
       </p>
-      <AplSectionData checker={AplCheck.check} apl={AplCheck.apl()} />
+      <SubSection>
+        <AplSectionData checker={AplCheck.check} summary={OutlawAplSummary} apl={AplCheck.apl()} />
+      </SubSection>
       <hr />
       <p>
         <strong>Disclaimer:</strong> (Currently unsuported spells/talents)
