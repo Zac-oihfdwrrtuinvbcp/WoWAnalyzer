@@ -1,8 +1,4 @@
-import {
-  RuneDetails,
-  RuneOfTheFallenCrusader,
-  RuneOfHysteria,
-} from 'analysis/retail/deathknight/shared';
+import { RuneDetails, RuneOfTheFallenCrusader } from 'analysis/retail/deathknight/shared';
 import CoreCombatLogParser from 'parser/core/CombatLogParser';
 import Channeling from 'parser/shared/normalizers/Channeling';
 
@@ -15,7 +11,6 @@ import BlooddrinkerTicks from './modules/features/BlooddrinkerTicks';
 import BloodPlagueUptime from './modules/features/BloodPlagueUptime';
 import BoneShield from './modules/features/BoneShield';
 import BoneShieldTimesByStacks from './modules/features/BoneShieldTimesByStacks';
-import Checklist from './modules/features/checklist/Module';
 import CooldownThroughputTracker from './modules/features/CooldownThroughputTracker';
 import CrimsonScourge from './modules/features/CrimsonScourge';
 import DancingRuneWeapon from './modules/features/DancingRuneWeapon';
@@ -47,7 +42,7 @@ import WillOfTheNecropolis from './modules/talents/WillOfTheNecropolis';
 import RuneTracker from './modules/core/RuneTracker';
 import ResourceOrderNormalizer from './modules/core/ResourceOrderNormalizer';
 import BoneShieldOrderNormalizer from './modules/core/BoneShieldOrderNormalizer';
-import AplCheck from './modules/features/AplCheck';
+import ExterminateCostNormalizer from '../shared/ExterminateCostNormalizer';
 
 class CombatLogParser extends CoreCombatLogParser {
   static specModules = {
@@ -66,7 +61,6 @@ class CombatLogParser extends CoreCombatLogParser {
     dancingRuneWeapon: DancingRuneWeapon,
     initialMarrowrendCast: InitialMarrowrendCast,
     blooddrinkerTicks: BlooddrinkerTicks,
-    checklist: Checklist,
     deathStrikeTiming: DeathStrikeTiming,
     marrowrendUsage: MarrowrendUsage,
     boneShield: BoneShield,
@@ -101,18 +95,17 @@ class CombatLogParser extends CoreCombatLogParser {
     // Runes
     runeForgeChecker: RuneForgeChecker,
     runeOfTheFallenCrusader: RuneOfTheFallenCrusader,
-    runeOfHysteria: RuneOfHysteria,
 
     // guide stuff
     deathStrike: DeathStrike,
     bloodShield: BloodShield,
-    aplCheck: AplCheck,
 
     // normalizers
     deathStrikeNormalizer: DeathStrikeLinkNormalizer,
     bloodShieldNormalizer: BloodShieldNormalizer,
     resourceOrderNormalizer: ResourceOrderNormalizer,
     boneShieldOrderNormalizer: BoneShieldOrderNormalizer,
+    ExterminateCostNormalizer,
   };
 
   static guide = BloodGuide;

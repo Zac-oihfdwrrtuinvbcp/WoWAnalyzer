@@ -9,9 +9,8 @@ import CastEfficiencyBar from 'parser/ui/CastEfficiencyBar';
 import { CooldownWindow, fromExecuteRange, GapHighlight } from 'parser/ui/CooldownBar';
 import Voidbolt from '../spells/Voidbolt';
 import ShadowWordDeath from '../spells/ShadowWordDeath';
-import ItemSetLink from 'interface/ItemSetLink';
-import { TIERS } from 'game/TIERS';
-import { PRIEST_DF3_ID } from 'common/ITEMS/dragonflight';
+//import ItemSetLink from 'interface/ItemSetLink';
+//import { TIERS } from 'game/TIERS';
 
 type Cooldown = {
   talent: Talent;
@@ -23,11 +22,11 @@ type SpellCooldown = {
   activeWindows?: CooldownWindow[];
 };
 
+//Core Cooldowns
 const coreCooldowns: SpellCooldown[] = [
   { spell: SPELLS.MIND_BLAST },
   { spell: TALENTS.SHADOW_WORD_DEATH_TALENT },
 ];
-
 const coreCooldownsVB: SpellCooldown[] = [
   //you can't push VoidBolt to coreCooldowns later on without adding it multiple times when changing tabs, so we just use a different list
   { spell: SPELLS.MIND_BLAST },
@@ -35,12 +34,14 @@ const coreCooldownsVB: SpellCooldown[] = [
   { spell: SPELLS.VOID_BOLT },
 ];
 
+//Short Cooldowns
 const shortCooldowns: Cooldown[] = [
   { talent: TALENTS.VOID_TORRENT_TALENT },
-  { talent: TALENTS.MINDGAMES_TALENT },
-  { talent: TALENTS.SHADOW_CRASH_TALENT },
+  { talent: TALENTS.SHADOW_CRASH_1_SHADOW_TALENT },
+  { talent: TALENTS.SHADOW_CRASH_2_SHADOW_TALENT },
 ];
 
+//Long Cooldowns
 const longCooldownsMB: Cooldown[] = [
   { talent: TALENTS.POWER_INFUSION_TALENT },
   { talent: TALENTS.DARK_ASCENSION_TALENT },
@@ -50,6 +51,21 @@ const longCooldownsMB: Cooldown[] = [
 const longCooldownsSF: Cooldown[] = [
   { talent: TALENTS.POWER_INFUSION_TALENT },
   { talent: TALENTS.DARK_ASCENSION_TALENT },
+  { talent: TALENTS.VOID_ERUPTION_TALENT },
+  { talent: TALENTS.SHADOWFIEND_TALENT },
+];
+
+const longCooldownsMBARC: Cooldown[] = [
+  { talent: TALENTS.POWER_INFUSION_TALENT },
+  { talent: TALENTS.DARK_ASCENSION_TALENT },
+  { talent: TALENTS.HALO_SHADOW_TALENT },
+  { talent: TALENTS.VOID_ERUPTION_TALENT },
+  { talent: TALENTS.MINDBENDER_SHADOW_TALENT },
+];
+const longCooldownsSFARC: Cooldown[] = [
+  { talent: TALENTS.POWER_INFUSION_TALENT },
+  { talent: TALENTS.DARK_ASCENSION_TALENT },
+  { talent: TALENTS.HALO_SHADOW_TALENT },
   { talent: TALENTS.VOID_ERUPTION_TALENT },
   { talent: TALENTS.SHADOWFIEND_TALENT },
 ];
@@ -70,28 +86,20 @@ const CoreCooldownsGraph = () => {
       <strong>
         <SpellLink spell={TALENTS.SHADOW_WORD_DEATH_TALENT} />
       </strong>{' '}
-      {info!.combatant.has4PieceByTier(TIERS.DF3) && (
-        <>
-          should always be used on cooldown with{' '}
-          <ItemSetLink id={PRIEST_DF3_ID}> Amirdrassil 4 Piece</ItemSetLink> equppied.
-        </>
-      )}
-      {!info!.combatant.has4PieceByTier(TIERS.DF3) && (
-        <>
-          should be used during execute,{' '}
-          {info!.combatant.hasTalent(TALENTS.DEATHSPEAKER_TALENT) && (
-            <>
-              and with <SpellLink spell={TALENTS.DEATHSPEAKER_TALENT} /> procs,{' '}
-            </>
-          )}
-          {info!.combatant.hasTalent(TALENTS.INESCAPABLE_TORMENT_TALENT) && (
-            <>
-              and during <SpellLink spell={TALENTS.MINDBENDER_SHADOW_TALENT} /> with{' '}
-              <SpellLink spell={TALENTS.INESCAPABLE_TORMENT_TALENT} /> talented.
-            </>
-          )}
-        </>
-      )}
+      <>
+        should be used during execute,{' '}
+        {info!.combatant.hasTalent(TALENTS.DEATHSPEAKER_TALENT) && (
+          <>
+            and with <SpellLink spell={TALENTS.DEATHSPEAKER_TALENT} /> procs,{' '}
+          </>
+        )}
+        {info!.combatant.hasTalent(TALENTS.INESCAPABLE_TORMENT_TALENT) && (
+          <>
+            and during <SpellLink spell={TALENTS.MINDBENDER_SHADOW_TALENT} /> with{' '}
+            <SpellLink spell={TALENTS.INESCAPABLE_TORMENT_TALENT} /> talented.
+          </>
+        )}
+      </>
       <br />
       {info!.combatant.hasTalent(TALENTS.VOID_ERUPTION_TALENT) && (
         <>
@@ -163,33 +171,15 @@ const ShortCooldownsGraph = () => {
         </>
       )}
 
-      {info!.combatant.hasTalent(TALENTS.MINDGAMES_TALENT) && (
+      {(info!.combatant.hasTalent(TALENTS.SHADOW_CRASH_1_SHADOW_TALENT) ||
+        info!.combatant.hasTalent(TALENTS.SHADOW_CRASH_2_SHADOW_TALENT)) && (
         <>
           <strong>
-            <SpellLink spell={TALENTS.MINDGAMES_TALENT} />
-          </strong>{' '}
-          is a lower priority spell, but when it is cast, make sure{' '}
-          <SpellLink spell={TALENTS.DEVOURING_PLAGUE_TALENT} /> is on its target so it benefits
-          fully from <SpellLink spell={SPELLS.MASTERY_SHADOW_WEAVING} />.
-        </>
-      )}
-
-      {info!.combatant.hasTalent(TALENTS.SHADOW_CRASH_TALENT) && (
-        <>
-          <strong>
-            <SpellLink spell={TALENTS.SHADOW_CRASH_TALENT} />
+            <SpellLink spell={TALENTS.SHADOW_CRASH_1_SHADOW_TALENT} />
           </strong>{' '}
           is used to apply and refresh <SpellLink spell={SPELLS.VAMPIRIC_TOUCH} />. This can be held
           if it would allow you to apply your dots to more targets.
           <br />
-          {info!.combatant.has4PieceByTier(TIERS.DF3) && (
-            <>
-              &nbsp;&nbsp;&nbsp;&nbsp;
-              <SpellLink spell={TALENTS.SHADOW_CRASH_TALENT} /> should also be used to spend stacks
-              of <SpellLink spell={SPELLS.SHADOW_PRIEST_TIER_31_4_SET_BUFF} /> from{' '}
-              <ItemSetLink id={PRIEST_DF3_ID}> Amirdrassil 4 Piece </ItemSetLink>{' '}
-            </>
-          )}
         </>
       )}
     </p>
@@ -200,8 +190,14 @@ const ShortCooldownsGraph = () => {
 const LongCooldownsGraph = () => {
   const info = useInfo();
   let longCooldowns = longCooldownsSF;
+  if (info!.combatant.hasTalent(TALENTS.POWER_SURGE_TALENT)) {
+    longCooldowns = longCooldownsSFARC;
+  }
   if (info!.combatant.hasTalent(TALENTS.MINDBENDER_SHADOW_TALENT)) {
     longCooldowns = longCooldownsMB;
+    if (info!.combatant.hasTalent(TALENTS.POWER_SURGE_TALENT)) {
+      longCooldowns = longCooldownsMBARC;
+    }
   }
 
   const message = (

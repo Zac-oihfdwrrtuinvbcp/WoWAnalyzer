@@ -30,14 +30,13 @@ export default function Guide({ modules, events, info }: GuideProps<typeof Comba
           modules.risingSunKick.guideSubsection}
         {modules.thunderFocusTea.guideSubsection}
         {modules.vivify.guideSubsection}
-        {(info.combatant.hasTalent(TALENTS_MONK.ANCIENT_TEACHINGS_TALENT) ||
-          info.combatant.hasTalent(TALENTS_MONK.UPWELLING_TALENT)) &&
-          modules.essenceFont.guideSubsection}
         {info.combatant.hasTalent(TALENTS_MONK.ANCIENT_TEACHINGS_TALENT) &&
           modules.ancientTeachings.guideSubsection}
         {info.combatant.hasTalent(TALENTS_MONK.SHEILUNS_GIFT_TALENT) && (
           <SheilunsGraph modules={modules} events={events} info={info} />
         )}
+        {info.combatant.hasTalent(TALENTS_MONK.ASPECT_OF_HARMONY_TALENT) &&
+          modules.aspectOfHarmony.guideSubsection}
         <RemGraphSubsection modules={modules} events={events} info={info} />
       </Section>
       <Section title="Healing Cooldowns">
@@ -45,9 +44,11 @@ export default function Guide({ modules, events, info }: GuideProps<typeof Comba
         {info.combatant.hasTalent(TALENTS_MONK.INVOKE_CHI_JI_THE_RED_CRANE_TALENT)
           ? modules.invokeChiJi.guideCastBreakdown
           : modules.invokeYulon.guideCastBreakdown}
-        {(info.combatant.hasTalent(TALENTS_MONK.JADE_BOND_TALENT) ||
-          info.combatant.hasTalent(TALENTS_MONK.SHAOHAOS_LESSONS_TALENT)) &&
+        {(info.combatant.hasTalent(TALENTS_MONK.SHAOHAOS_LESSONS_TALENT) ||
+          info.combatant.hasTalent(TALENTS_MONK.JADE_BOND_TALENT)) &&
           modules.revival.guideCastBreakdown}
+        {info.combatant.hasTalent(TALENTS_MONK.CELESTIAL_CONDUIT_TALENT) &&
+          modules.celestialConduit.guideCastBreakdown}
         {/* {info.combatant.hasTalent(TALENTS_MONK.MANA_TEA_TALENT) &&
           modules.manaTea.guideCastBreakdown} */}
         <HotGraphSubsection modules={modules} events={events} info={info} />
@@ -77,10 +78,14 @@ export default function Guide({ modules, events, info }: GuideProps<typeof Comba
       <Section title="Other cooldowns, buffs, and procs">
         {info.combatant.hasTalent(TALENTS_MONK.LIFE_COCOON_TALENT) &&
           modules.lifeCocoon.guideSubsection}
-        {info.combatant.hasTalent(TALENTS_MONK.CHI_BURST_TALENT) &&
+        {info.combatant.hasTalent(TALENTS_MONK.CHI_BURST_SHARED_TALENT) &&
           modules.chiBurst.guideSubsection}
         {info.combatant.hasTalent(TALENTS_MONK.VIVACIOUS_VIVIFICATION_TALENT) &&
           modules.vivaciousVivification.guideSubsection}
+        {info.combatant.hasTalent(TALENTS_MONK.ZEN_PULSE_TALENT) &&
+          modules.zenPulse.guideSubsection}
+        {info.combatant.hasTalent(TALENTS_MONK.STRENGTH_OF_THE_BLACK_OX_TALENT) &&
+          modules.strengthOfTheBlackOx.guideSubsection}
       </Section>
       <PreparationSection />
     </>

@@ -4,18 +4,22 @@ import { Spec } from 'game/SPECS';
 import { AlertKind } from 'interface/Alert';
 import CombatLogParser from 'parser/core/CombatLogParser';
 import { ReactNode } from 'react';
+import GameBranch from 'game/GameBranch';
+import type { StringWithAutocompleteOptions } from 'common/stringWithAutocompleteOptions';
 
 import type { Stats } from './shared/modules/StatTracker';
-import GameBranch from 'game/GameBranch';
 
-type VaultPatchCycle = `0.${0 | 2 | 5 | 7}`;
-type AberrusPatchCycle = `1.${0 | 5 | 7}`;
-type AmirdrassilPatchCycle = `2.${0 | 5 | 6 | 7}`;
-export type DragonflightPatchVersion = `10.${
-  | VaultPatchCycle
-  | AberrusPatchCycle
-  | AmirdrassilPatchCycle}`;
-export type CataPatchVersion = `4.4.0`;
+type VaultPatchCycle = `10.0.${0 | 2 | 5 | 7}`;
+type AberrusPatchCycle = `10.1.${0 | 5 | 7}`;
+type AmirdrassilPatchCycle = `10.2.${0 | 5 | 6 | 7}`;
+export type DragonflightPatchVersion = StringWithAutocompleteOptions<
+  VaultPatchCycle | AberrusPatchCycle | AmirdrassilPatchCycle
+>;
+
+type NerubarPatchCycle = `11.0.${0 | 2}`;
+export type TwwPatchVersion = StringWithAutocompleteOptions<NerubarPatchCycle>;
+
+export type CataPatchVersion = StringWithAutocompleteOptions<`4.4.0`>;
 
 export enum SupportLevel {
   /**
@@ -46,7 +50,7 @@ export enum SupportLevel {
 
 interface CoreConfig {
   branch: GameBranch;
-  patchCompatibility: null | DragonflightPatchVersion | CataPatchVersion;
+  patchCompatibility: null | DragonflightPatchVersion | TwwPatchVersion | CataPatchVersion;
   /**
    * The people that have contributed to this spec recently. People don't have
    * to sign up to be long-time maintainers to be included in this list. If
@@ -102,7 +106,7 @@ interface CoreConfig {
   /**
    * The contents of your changelog.
    */
-  changelog: ChangelogEntry[];
+  changelog?: ChangelogEntry[];
   /**
    * The CombatLogParser class for your spec.
    */

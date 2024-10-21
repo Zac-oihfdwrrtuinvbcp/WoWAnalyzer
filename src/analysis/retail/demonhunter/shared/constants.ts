@@ -7,6 +7,8 @@ export const SHATTERED_RESTORATION_SCALING = [0, 5, 10];
 
 export const UNRESTRAINED_FURY_SCALING = [0, 10, 20];
 
+export const UNTETHERED_FURY_SCALING = [0, 50];
+
 export const ERRATIC_FELHEART_SCALING = [0, 0.1, 0.2];
 
 export const PITCH_BLACK_SCALING = [0, 120];
@@ -17,7 +19,7 @@ export const CHAMPION_OF_THE_GLAIVE_SCALING = [0, 1];
 
 export const RUSH_OF_CHAOS_SCALING = [0, 30, 60];
 
-export const DEMONIC_DURATION = 6000;
+export const DEMONIC_DURATION = 5000;
 
 export function getSigilOfFlameSpell(c: Combatant): Spell {
   if (c.hasTalent(TALENTS_DEMON_HUNTER.PRECISE_SIGILS_TALENT)) {
@@ -33,11 +35,11 @@ export function getSigilOfMiserySpell(c: Combatant): Spell {
   return TALENTS_DEMON_HUNTER.SIGIL_OF_MISERY_TALENT;
 }
 
-export function getElysianDecreeSpell(c: Combatant): Spell {
+export function getSigilOfSpiteSpell(c: Combatant): Spell {
   if (c.hasTalent(TALENTS_DEMON_HUNTER.PRECISE_SIGILS_TALENT)) {
-    return SPELLS.ELYSIAN_DECREE_PRECISE;
+    return SPELLS.SIGIL_OF_SPITE_PRECISE;
   }
-  return TALENTS_DEMON_HUNTER.ELYSIAN_DECREE_TALENT;
+  return TALENTS_DEMON_HUNTER.SIGIL_OF_SPITE_TALENT;
 }
 
 export function getSigilOfSilenceSpell(c: Combatant): Spell {
@@ -74,11 +76,11 @@ const SIGIL_OF_MISERY_SPELLS: Spell[] = [
 ];
 export const SIGIL_OF_MISERY_SPELL_IDS = SIGIL_OF_MISERY_SPELLS.map((spell) => spell.id);
 
-const ELYSIAN_DECREE_SPELLS: Spell[] = [
-  TALENTS_DEMON_HUNTER.ELYSIAN_DECREE_TALENT,
-  SPELLS.ELYSIAN_DECREE_PRECISE,
+const SIGIL_OF_SPITE_SPELLS: Spell[] = [
+  TALENTS_DEMON_HUNTER.SIGIL_OF_SPITE_TALENT,
+  SPELLS.SIGIL_OF_SPITE_PRECISE,
 ];
-export const ELYSIAN_DECREE_SPELL_IDS = ELYSIAN_DECREE_SPELLS.map((spell) => spell.id);
+export const SIGIL_OF_SPITE_SPELL_IDS = SIGIL_OF_SPITE_SPELLS.map((spell) => spell.id);
 
 const SIGIL_OF_SILENCE_SPELLS: Spell[] = [
   TALENTS_DEMON_HUNTER.SIGIL_OF_SILENCE_TALENT,
@@ -91,3 +93,14 @@ const SIGIL_OF_CHAINS_SPELLS: Spell[] = [
   SPELLS.SIGIL_OF_CHAINS_PRECISE,
 ];
 export const SIGIL_OF_CHAINS_SPELL_IDS = SIGIL_OF_CHAINS_SPELLS.map((spell) => spell.id);
+
+export const DEMONSURGE_TRIGGERS = {
+  HAVOC: {
+    DEMONIC: [SPELLS.ANNIHILATION, SPELLS.DEATH_SWEEP],
+    HARDCAST_ADDL: [SPELLS.SIGIL_OF_DOOM_CAST, SPELLS.CONSUMING_FIRE_1, SPELLS.ABYSSAL_GAZE],
+  },
+  VENGEANCE: {
+    DEMONIC: [SPELLS.SOUL_SUNDER, SPELLS.SPIRIT_BURST],
+    HARDCAST_ADDL: [SPELLS.SIGIL_OF_DOOM_CAST, SPELLS.CONSUMING_FIRE_1, SPELLS.FEL_DESOLATION],
+  },
+};

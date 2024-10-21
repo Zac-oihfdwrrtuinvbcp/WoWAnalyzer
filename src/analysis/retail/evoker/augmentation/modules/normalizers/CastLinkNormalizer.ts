@@ -19,6 +19,7 @@ import EventLinkNormalizer, { EventLink } from 'parser/core/EventLinkNormalizer'
 import { encodeEventTargetString } from 'parser/shared/modules/Enemies';
 import PrePullCooldowns from 'parser/shared/normalizers/PrePullCooldowns';
 import { LEAPING_FLAMES_HITS } from 'analysis/retail/evoker/shared/modules/normalizers/LeapingFlamesNormalizer';
+import { BREATH_OF_EONS_SPELL_IDS } from '../../constants';
 
 /** So sometimes when Ebon Might should be extended
  * it just kinda doesn't? This messes with our analysis so
@@ -37,12 +38,19 @@ export const EBON_MIGHT_APPLY_REMOVE_LINK = 'ebonMightApplyRemoveLink';
 export const BREATH_OF_EONS_CAST_DEBUFF_APPLY_LINK = 'breathOfEonsCastDebuffApplyLink';
 export const BREATH_OF_EONS_CAST_BUFF_LINK = 'breathOfEonsCastBuffLink';
 export const BREATH_OF_EONS_DAMAGE_LINK = 'breathOfEonsDamageLink';
+export const BREATH_OF_EONS_DEBUFF_LINK = 'breathOfEonsDebuffLink';
 
 const ERUPTION_CAST_DAM_LINK = 'eruptionCastDamLink';
 const ERUPTION_CHITIN_LINK = 'eruptionChitinLink';
 const PUPIL_OF_ALEXSTRASZA_LINK = 'pupilOfAlexstraszaLink';
+export const UPHEAVAL_CAST_DAM_LINK = 'upheavalCastDamLink';
+export const UPHEAVAL_RUMBLING_EARTH_LINK = 'upheavalRumblingEarthLink';
 // Tier
 export const TREMBLING_EARTH_DAM_LINK = 'tremblingEarthDamLink';
+
+export const MASS_ERUPTION_DAM_LINK = 'massEruptionDamLink';
+export const MASS_ERUPTION_CONSUME = 'massEruptionConsume';
+const MASS_ERUPTION_DAMAGE_BUFFER = 1000; // These have very spooky delay
 
 const PRESCIENCE_BUFFER = 150;
 const CAST_BUFFER_MS = 100;
@@ -50,8 +58,10 @@ const BREATH_EBON_BUFFER = 250;
 const EBON_MIGHT_BUFFER = 150;
 const BREATH_OF_EONS_DEBUFF_APPLY_BUFFER = 8000;
 const BREATH_OF_EONS_BUFF_BUFFER = 8000;
+const BREATH_OF_EONS_DEBUFF_BUFFER = 14000;
 const BREATH_OF_EONS_DAMAGE_BUFFER = 100;
 const PUPIL_OF_ALEXSTRASZA_BUFFER = 1000;
+const UPHEAVAL_DAMAGE_BUFFER = 800;
 
 // Tier
 // No clue why but this gets very weirdly staggered/delayed
@@ -82,7 +92,7 @@ const EVENT_LINKS: EventLink[] = [
   {
     linkRelation: BREATH_EBON_APPLY_LINK,
     reverseLinkRelation: BREATH_EBON_APPLY_LINK,
-    linkingEventId: TALENTS.BREATH_OF_EONS_TALENT.id,
+    linkingEventId: BREATH_OF_EONS_SPELL_IDS,
     linkingEventType: EventType.Cast,
     referencedEventId: SPELLS.EBON_MIGHT_BUFF_PERSONAL.id,
     referencedEventType: EventType.ApplyBuff,
@@ -113,7 +123,7 @@ const EVENT_LINKS: EventLink[] = [
   {
     linkRelation: BREATH_OF_EONS_CAST_DEBUFF_APPLY_LINK,
     reverseLinkRelation: BREATH_OF_EONS_CAST_DEBUFF_APPLY_LINK,
-    linkingEventId: TALENTS.BREATH_OF_EONS_TALENT.id,
+    linkingEventId: BREATH_OF_EONS_SPELL_IDS,
     linkingEventType: EventType.Cast,
     referencedEventId: SPELLS.TEMPORAL_WOUND_DEBUFF.id,
     referencedEventType: EventType.ApplyDebuff,
@@ -124,9 +134,9 @@ const EVENT_LINKS: EventLink[] = [
   {
     linkRelation: BREATH_OF_EONS_CAST_BUFF_LINK,
     reverseLinkRelation: BREATH_OF_EONS_CAST_BUFF_LINK,
-    linkingEventId: TALENTS.BREATH_OF_EONS_TALENT.id,
+    linkingEventId: BREATH_OF_EONS_SPELL_IDS,
     linkingEventType: [EventType.Cast],
-    referencedEventId: TALENTS.BREATH_OF_EONS_TALENT.id,
+    referencedEventId: BREATH_OF_EONS_SPELL_IDS,
     referencedEventType: [EventType.ApplyBuff, EventType.RemoveBuff],
     anyTarget: true,
     forwardBufferMs: BREATH_OF_EONS_BUFF_BUFFER,
@@ -141,6 +151,37 @@ const EVENT_LINKS: EventLink[] = [
     referencedEventType: EventType.Damage,
     anyTarget: false,
     forwardBufferMs: BREATH_OF_EONS_DAMAGE_BUFFER,
+  },
+  /**
+   * So this is *slightly* cursed, but basically fixes an issue with mobs sharing HP eg. Silken Court.
+   * Essentially will just apply links backwards if no link is already present.
+   * example log:
+   * https://www.warcraftlogs.com/reports/zCvY2PKpHtd6MqAW#fight=4&type=auras&pins=0%24Separate%24%23244F4B%24damage%240%240.0.0.Any%24184027896.0.0.Evoker%24true%240.0.0.Any%24false%24409632&hostility=1&spells=debuffs&target=217&ability=409560&view=events&start=4819003&end=4837682
+   */
+  {
+    linkRelation: BREATH_OF_EONS_DAMAGE_LINK,
+    reverseLinkRelation: BREATH_OF_EONS_DAMAGE_LINK,
+    linkingEventId: SPELLS.BREATH_OF_EONS_DAMAGE.id,
+    linkingEventType: EventType.Damage,
+    referencedEventId: SPELLS.TEMPORAL_WOUND_DEBUFF.id,
+    referencedEventType: EventType.RemoveDebuff,
+    anyTarget: true,
+    maximumLinks: 1,
+    backwardBufferMs: BREATH_OF_EONS_DAMAGE_BUFFER,
+    additionalCondition(linkingEvent, _referencedEvent) {
+      return !HasRelatedEvent(linkingEvent, BREATH_OF_EONS_DAMAGE_LINK);
+    },
+  },
+  {
+    linkRelation: BREATH_OF_EONS_DEBUFF_LINK,
+    reverseLinkRelation: BREATH_OF_EONS_DEBUFF_LINK,
+    linkingEventId: SPELLS.TEMPORAL_WOUND_DEBUFF.id,
+    linkingEventType: EventType.ApplyDebuff,
+    referencedEventId: SPELLS.TEMPORAL_WOUND_DEBUFF.id,
+    referencedEventType: EventType.RemoveDebuff,
+    anyTarget: false,
+    maximumLinks: 1,
+    forwardBufferMs: BREATH_OF_EONS_DEBUFF_BUFFER,
   },
   {
     linkRelation: PUPIL_OF_ALEXSTRASZA_LINK,
@@ -224,6 +265,58 @@ const EVENT_LINKS: EventLink[] = [
     forwardBufferMs: TREMBLING_EARTH_BUFFER,
     backwardBufferMs: TREMBLING_EARTH_BUFFER,
   },
+  {
+    linkRelation: UPHEAVAL_CAST_DAM_LINK,
+    reverseLinkRelation: UPHEAVAL_CAST_DAM_LINK,
+    linkingEventId: [TALENTS.UPHEAVAL_TALENT.id, SPELLS.UPHEAVAL_FONT.id],
+    linkingEventType: EventType.EmpowerEnd,
+    referencedEventId: SPELLS.UPHEAVAL_DAM.id,
+    referencedEventType: EventType.Damage,
+    anyTarget: true,
+    forwardBufferMs: UPHEAVAL_DAMAGE_BUFFER,
+    isActive: (c) => c.hasTalent(TALENTS.UPHEAVAL_TALENT),
+    additionalCondition(linkingEvent, referencedEvent) {
+      return upheavalHitIsUnique(linkingEvent as EmpowerEndEvent, referencedEvent as DamageEvent);
+    },
+  },
+  {
+    linkRelation: UPHEAVAL_RUMBLING_EARTH_LINK,
+    reverseLinkRelation: UPHEAVAL_RUMBLING_EARTH_LINK,
+    linkingEventId: [TALENTS.UPHEAVAL_TALENT.id, SPELLS.UPHEAVAL_FONT.id],
+    linkingEventType: EventType.EmpowerEnd,
+    referencedEventId: SPELLS.UPHEAVAL_DAM.id,
+    referencedEventType: EventType.Damage,
+    anyTarget: true,
+    forwardBufferMs: UPHEAVAL_DAMAGE_BUFFER * 2,
+    isActive: (c) => c.hasTalent(TALENTS.RUMBLING_EARTH_TALENT),
+    additionalCondition(_linkingEvent, referencedEvent) {
+      return !HasRelatedEvent(referencedEvent, UPHEAVAL_CAST_DAM_LINK);
+    },
+  },
+  {
+    linkRelation: MASS_ERUPTION_CONSUME,
+    reverseLinkRelation: MASS_ERUPTION_CONSUME,
+    linkingEventId: TALENTS.ERUPTION_TALENT.id,
+    linkingEventType: EventType.Cast,
+    referencedEventId: SPELLS.MASS_ERUPTION_BUFF.id,
+    referencedEventType: [EventType.RemoveBuff, EventType.RemoveBuffStack],
+    anyTarget: true,
+    forwardBufferMs: CAST_BUFFER_MS,
+    backwardBufferMs: CAST_BUFFER_MS,
+    isActive: (C) => C.hasTalent(TALENTS.MASS_ERUPTION_TALENT),
+    maximumLinks: 1,
+  },
+  {
+    linkRelation: MASS_ERUPTION_DAM_LINK,
+    reverseLinkRelation: MASS_ERUPTION_DAM_LINK,
+    linkingEventId: TALENTS.ERUPTION_TALENT.id,
+    linkingEventType: EventType.Cast,
+    referencedEventId: SPELLS.MASS_ERUPTION_DAMAGE.id,
+    referencedEventType: EventType.Damage,
+    anyTarget: true,
+    forwardBufferMs: MASS_ERUPTION_DAMAGE_BUFFER,
+    isActive: (C) => C.hasTalent(TALENTS.MASS_ERUPTION_TALENT),
+  },
 ];
 
 class CastLinkNormalizer extends EventLinkNormalizer {
@@ -304,6 +397,26 @@ export function ebonIsFromBreath(event: ApplyBuffEvent | CastEvent) {
 
 export function failedEbonMightExtension(event: CastEvent | EmpowerEndEvent) {
   return HasRelatedEvent(event, FAILED_EXTENSION_LINK);
+}
+
+function upheavalHitIsUnique(castEvent: EmpowerEndEvent, damageEvent: DamageEvent) {
+  const previousEvents = GetRelatedEvents<DamageEvent>(castEvent, UPHEAVAL_CAST_DAM_LINK);
+
+  return !previousEvents.some(
+    (e) => encodeEventTargetString(e) === encodeEventTargetString(damageEvent),
+  );
+}
+
+export function isFromMassEruption(event: CastEvent) {
+  return HasRelatedEvent(event, MASS_ERUPTION_CONSUME);
+}
+
+export function getMassEruptionDamageEvents(event: CastEvent): DamageEvent[] {
+  return GetRelatedEvents(
+    event,
+    MASS_ERUPTION_DAM_LINK,
+    (e): e is DamageEvent => e.type === EventType.Damage,
+  );
 }
 
 export default CastLinkNormalizer;

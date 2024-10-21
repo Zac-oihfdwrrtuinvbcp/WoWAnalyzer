@@ -32,7 +32,7 @@ import SoulFragmentsConsume from './modules/statistics/SoulFragmentsConsume';
 import SoulsOvercap from './modules/statistics/SoulsOvercap';
 import AgonizingFlames from './modules/talents/AgonizingFlames';
 import BurningAlive from './modules/talents/BurningAlive';
-import ElysianDecree from './modules/talents/ElysianDecree';
+import SigilOfSpite from './modules/talents/SigilOfSpite';
 import FeastOfSouls from './modules/talents/FeastOfSouls';
 import FeedTheDemon from './modules/talents/FeedTheDemon';
 import SoulBarrier from './modules/talents/SoulBarrier';
@@ -59,10 +59,13 @@ import FieryBrand2 from './modules/core/MajorDefensives/FieryBrand';
 import DemonSpikes from './modules/core/MajorDefensives/DemonSpikes';
 import Metamorphosis from './modules/core/MajorDefensives/Metamorphosis';
 import Guide from './Guide';
-import FelDevastationNormalizer from './normalizers/FelDevastationNormalizer';
+import FelDevastationLinkNormalizer from './normalizers/FelDevastationLinkNormalizer';
 import CycleOfBindingNormalizer from './normalizers/CycleOfBindingNormalizer';
 import CycleOfBinding from './modules/talents/CycleOfBinding';
-import { ScreamingTorchfiendsBrutality } from './modules/dragonflight/tier/ScreamingTorchfiendsBrutality';
+import ConsumingFireNormalizer from '../shared/normalizers/ConsumingFireNormalizer';
+import FelDevastationNormalizer from './normalizers/FelDevastationNormalizer';
+import Demonsurge from '../shared/modules/hero/felscarred/Demonsurge/analyzer';
+import DemonsurgeEventLinkNormalizer from '../shared/modules/hero/felscarred/Demonsurge/eventLinkNormalizer';
 
 class CombatLogParser extends CoreCombatLogParser {
   static specModules = {
@@ -91,8 +94,10 @@ class CombatLogParser extends CoreCombatLogParser {
     defensiveBuffLinkNormalizer: DefensiveBuffLinkNormalizer,
     theHuntNormalizer: TheHuntNormalizer,
     felDevastationNormalizer: FelDevastationNormalizer,
+    felDevastationLinkNormalizer: FelDevastationLinkNormalizer,
     sigilOfFlamesNormalizer: SigilOfFlameNormalizer,
     cycleOfBindingNormalizer: CycleOfBindingNormalizer,
+    consumingFireNormalizer: ConsumingFireNormalizer,
 
     // Spell
     immolationAura: ImmolationAura,
@@ -115,7 +120,7 @@ class CombatLogParser extends CoreCombatLogParser {
     shearFracture: ShearFracture,
     shatteredRestoration: ShatteredRestoration,
     theHunt: TheHunt,
-    elysianDecree: ElysianDecree,
+    sigilOfSpite: SigilOfSpite,
     felblade: Felblade,
     charredWarblades: CharredWarblades,
     masterOfTheGlaive: MasterOfTheGlaive,
@@ -135,8 +140,11 @@ class CombatLogParser extends CoreCombatLogParser {
     sigilOfFlame: SigilOfFlame,
     cycleOfBinding: CycleOfBinding,
 
-    //  Tier sets
-    screamingTorchfiendsBrutality: ScreamingTorchfiendsBrutality,
+    // Hero
+    demonsurge: Demonsurge,
+    demonsurgeEventLinkNormalizer: DemonsurgeEventLinkNormalizer,
+
+    // Tier sets
 
     // Stats
     soulsOvercap: SoulsOvercap,

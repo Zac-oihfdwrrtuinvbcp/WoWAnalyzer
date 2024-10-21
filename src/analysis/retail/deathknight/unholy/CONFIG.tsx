@@ -2,7 +2,6 @@ import { AlexanderJKremer, Khazak, Bicepspump } from 'CONTRIBUTORS';
 import GameBranch from 'game/GameBranch';
 import SPECS from 'game/SPECS';
 import Config, { SupportLevel } from 'parser/Config';
-
 import CHANGELOG from './CHANGELOG';
 
 const config: Config = {
@@ -10,8 +9,8 @@ const config: Config = {
   contributors: [Khazak, AlexanderJKremer, Bicepspump],
   branch: GameBranch.Retail,
   // The WoW client patch this spec was last updated.
-  patchCompatibility: '10.1.7',
-  supportLevel: SupportLevel.MaintainedFull,
+  patchCompatibility: '11.0.2',
+  supportLevel: SupportLevel.Foundation,
   // Explain the status of this spec's analysis here. Try to mention how complete it is, and perhaps show links to places users can learn more.
   // If this spec's analysis does not show a complete picture please mention this in the `<Warning>` component.
   description: (
@@ -32,12 +31,12 @@ const config: Config = {
       <br />
       More resources for Unholy:
       <br />
-      <a href=" https://discord.gg/acherus" target="_blank" rel="noopener noreferrer">
+      <a href="https://discord.gg/acherus" target="_blank" rel="noopener noreferrer">
         Death Knight Class Discord
       </a>{' '}
       <br />
       <a
-        href="https://www.wowhead.com/unholy-death-knight-guide"
+        href="https://www.wowhead.com/guide/classes/death-knight/unholy/overview-pve-dps"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -55,7 +54,7 @@ const config: Config = {
     </>
   ),
   // A recent example report to see interesting parts of the spec. Will be shown on the homepage.
-  exampleReport: '/report/Tkw194nVPpWA7Q8L/40-Mythic+Broodkeeper+Diurna+-+Kill+(9:26)/Bicepspump',
+  exampleReport: '/report/VNBv3HX9dLxb1YMc/7-Normal+The+Bloodbound+Horror+-+Kill+(1:59)/Elenoray',
 
   // Don't change anything below this line;
   // The current spec identifier. This is the only place (in code) that specifies which spec this parser is about.

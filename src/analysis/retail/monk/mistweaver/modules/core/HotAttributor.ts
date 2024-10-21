@@ -63,8 +63,6 @@ class HotAttributor extends Analyzer {
   rdSourceENVAttrib = HotTracker.getNewAttribution(
     ATTRIBUTION_STRINGS.RAPID_DIFFUSION_SOURCES.RD_SOURCE_ENV,
   );
-  EFAttrib = HotTracker.getNewAttribution(ATTRIBUTION_STRINGS.HARDCAST_ESSENCE_FONT);
-  YulonAttrib = HotTracker.getNewAttribution(ATTRIBUTION_STRINGS.YULON);
 
   constructor(options: Options) {
     super(options);
@@ -79,14 +77,6 @@ class HotAttributor extends Analyzer {
     this.addEventListener(
       Events.refreshbuff.by(SELECTED_PLAYER).spell(TALENTS_MONK.ENVELOPING_MIST_TALENT),
       this.onApplyEnvm,
-    );
-    this.addEventListener(
-      Events.applybuff.by(SELECTED_PLAYER).spell([SPELLS.ESSENCE_FONT_BUFF]),
-      this.onApplyEF,
-    );
-    this.addEventListener(
-      Events.refreshbuff.by(SELECTED_PLAYER).spell([SPELLS.ESSENCE_FONT_BUFF]),
-      this.onApplyEF,
     );
     this.addEventListener(
       Events.removebuff.by(SELECTED_PLAYER).spell(SPELLS.RENEWING_MIST_HEAL),
@@ -152,9 +142,6 @@ class HotAttributor extends Analyzer {
       this.hotTracker.addAttributionFromApply(this.MistsOfLifeAttrib, event);
     } else if (event.prepull || isFromHardcast(event)) {
       this.hotTracker.addAttributionFromApply(this.envMistHardcastAttrib, event);
-      if (this.selectedCombatant.hasBuff(TALENTS_MONK.INVOKE_YULON_THE_JADE_SERPENT_TALENT.id)) {
-        this.hotTracker.addAttributionFromApply(this.YulonAttrib, event);
-      }
       debug &&
         console.log(
           'Attributed Enveloping Mist hardcast at ' +
@@ -174,13 +161,6 @@ class HotAttributor extends Analyzer {
           hot,
         );
     }
-  }
-
-  onApplyEF(event: ApplyBuffEvent | RefreshBuffEvent) {
-    if (this._hasAttribution(event)) {
-      return;
-    }
-    this.hotTracker.addAttributionFromApply(this.EFAttrib, event);
   }
 
   _hasAttribution(event: ApplyBuffEvent | HealEvent | RefreshBuffEvent | RemoveBuffEvent) {
@@ -287,10 +267,6 @@ class HotAttributor extends Analyzer {
           this.hotTracker.addAttributionFromApply(this.dmSourceMoLAttrib, event);
         }
 
-        if (this.hotTracker.fromYuLon(sourceHot)) {
-          this.hotTracker.addAttributionFromApply(this.YulonAttrib, event);
-        }
-
         dmHot.healingAfterOriginalEnd = 0;
         dmHot.maxDuration = sourceHot.maxDuration;
         dmHot.end = sourceHot.end;
@@ -308,9 +284,6 @@ class HotAttributor extends Analyzer {
       this.hotTracker.addAttributionFromApply(this.rdSourceRSKAttrib, event);
     } else if (isFromRapidDiffusionEnvelopingMist(event)) {
       this.hotTracker.addAttributionFromApply(this.rdSourceENVAttrib, event);
-      if (this.selectedCombatant.hasBuff(TALENTS_MONK.INVOKE_YULON_THE_JADE_SERPENT_TALENT.id)) {
-        this.hotTracker.addAttributionFromApply(this.YulonAttrib, event);
-      }
     }
     hot.maxDuration = this.hotTracker._getRapidDiffusionMaxDuration(this.selectedCombatant);
     hot.end = hot.originalEnd =

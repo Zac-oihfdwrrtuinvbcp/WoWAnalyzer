@@ -4,6 +4,7 @@ import { SpellLink } from 'interface';
 import SPELL_CATEGORY from 'parser/core/SPELL_CATEGORY';
 import { TALENTS_DRUID } from 'common/TALENTS';
 import { cdSpell } from 'analysis/retail/druid/balance/constants';
+import { hastedCooldown, normalGcd } from 'common/abilitiesConstants';
 
 class Abilities extends CoreAbilities {
   spellbook() {
@@ -116,7 +117,7 @@ class Abilities extends CoreAbilities {
       {
         spell: TALENTS_DRUID.FORCE_OF_NATURE_TALENT.id,
         category: SPELL_CATEGORY.COOLDOWNS,
-        cooldown: 60,
+        cooldown: 60 - combatant.getTalentRank(TALENTS_DRUID.EARLY_SPRING_TALENT) * 15,
         enabled: combatant.hasTalent(TALENTS_DRUID.FORCE_OF_NATURE_TALENT),
         gcd: {
           base: 1500,
@@ -144,9 +145,10 @@ class Abilities extends CoreAbilities {
           extraSuggestion: (
             <>
               Your <SpellLink spell={TALENTS_DRUID.NEW_MOON_TALENT} />,{' '}
-              <SpellLink spell={SPELLS.HALF_MOON} /> and <SpellLink spell={SPELLS.FULL_MOON} /> cast
-              efficiency can be improved, try keeping yourself at low Moon charges at all times; you
-              should (almost) never be at max (3) charges.
+              <SpellLink spell={TALENTS_DRUID.NEW_MOON_TALENT} /> and{' '}
+              <SpellLink spell={SPELLS.FULL_MOON} /> cast efficiency can be improved, try keeping
+              yourself at low Moon charges at all times; you should (almost) never be at max (3)
+              charges.
             </>
           ),
         },
@@ -198,6 +200,14 @@ class Abilities extends CoreAbilities {
 
       //Utility
       {
+        spell: SPELLS.FRENZIED_REGENERATION.id,
+        enabled: combatant.hasTalent(TALENTS_DRUID.FRENZIED_REGENERATION_TALENT),
+        category: SPELL_CATEGORY.DEFENSIVE,
+        cooldown: hastedCooldown(36),
+        gcd: normalGcd,
+        isDefensive: true,
+      },
+      {
         spell: [
           SPELLS.WILD_CHARGE_TALENT.id,
           SPELLS.WILD_CHARGE_MOONKIN.id,
@@ -224,14 +234,6 @@ class Abilities extends CoreAbilities {
         },
       },
       {
-        spell: SPELLS.SWIFTMEND.id,
-        category: SPELL_CATEGORY.DEFENSIVE,
-        enabled: combatant.hasTalent(TALENTS_DRUID.SWIFTMEND_TALENT),
-        gcd: {
-          base: 1500,
-        },
-      },
-      {
         spell: SPELLS.REJUVENATION.id,
         category: SPELL_CATEGORY.UTILITY,
         enabled: combatant.hasTalent(TALENTS_DRUID.REJUVENATION_TALENT),
@@ -243,6 +245,13 @@ class Abilities extends CoreAbilities {
         spell: SPELLS.WILD_GROWTH.id,
         category: SPELL_CATEGORY.UTILITY,
         enabled: combatant.hasTalent(TALENTS_DRUID.WILD_GROWTH_TALENT),
+        gcd: {
+          base: 1500,
+        },
+      },
+      {
+        spell: SPELLS.MOONKIN_FORM.id,
+        category: SPELL_CATEGORY.OTHERS,
         gcd: {
           base: 1500,
         },

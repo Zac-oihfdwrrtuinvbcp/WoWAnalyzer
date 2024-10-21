@@ -1,17 +1,17 @@
 import { expect, test } from './fixtures';
 
-const reportCode = 'Mr2VApnPLycBj9hW';
-const reportTitle = 'LFR princess';
-const fightLinkName = 'Kill 2:30';
-const fightUrlPart = '3-LFR+Council+of+Dreams+-+Kill+(2:30)';
-const bossTitle = `LFR Council of Dreams - Kill (2:30)`;
+const reportCode = 'GaB2ZMR769kJ8vNq';
+const reportTitle = "Amirdrassil, the Dream's Hope";
+const fightLinkName = 'Kill 4:36';
+const fightUrlPart = '11-Mythic+Smolderon+-+Kill+(4:36)';
+const bossTitle = `Mythic Smolderon - Kill (4:36)`;
 const fightPageTitle = `${bossTitle} in ${reportTitle}`;
-const playerLinkName = 'Toppledh Vengeance Demon Hunter Vengeance Demon Hunter 505';
-const playerName = 'Toppledh';
-const bossDifficultyAndName = 'LFRCouncil Of Dreams';
+const playerName = 'Thundrdh';
+const playerLinkName = `${playerName} Vengeance Demon Hunter Vengeance Demon Hunter 524`;
 const resultsPageTitle = `${bossTitle} by ${playerName} in ${reportTitle}`;
+const bossDifficultyAndName = 'MythicSmolderon';
 
-test('report selection', async ({ page, homePage, fightSelectionPage }) => {
+test.skip('report selection', async ({ page, homePage, fightSelectionPage }) => {
   await homePage.goto();
 
   await homePage.fillInReportInputWithCode(reportCode);

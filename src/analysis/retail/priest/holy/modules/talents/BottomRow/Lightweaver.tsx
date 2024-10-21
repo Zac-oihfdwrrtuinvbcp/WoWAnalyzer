@@ -1,7 +1,7 @@
 import Analyzer, { Options, SELECTED_PLAYER } from 'parser/core/Analyzer';
 import Events, { HealEvent, CastEvent } from 'parser/core/Events';
 import SPELLS from 'common/SPELLS/';
-import TALENTS from 'common/TALENTS/priest';
+import TALENTS, { TALENTS_PRIEST } from 'common/TALENTS/priest';
 import Statistic from 'parser/ui/Statistic';
 import STATISTIC_CATEGORY from 'parser/ui/STATISTIC_CATEGORY';
 import { formatPercentage } from 'common/format';
@@ -9,13 +9,13 @@ import ItemHealingDone from 'parser/ui/ItemHealingDone';
 import BoringSpellValueText from 'parser/ui/BoringSpellValueText';
 import { SpellLink } from 'interface';
 import { calculateEffectiveHealing, calculateOverhealing } from 'parser/core/EventCalculateLib';
-import { isCastBuffedByLightweaver, getHeal } from '../../../normalizers/CastLinkNormalizer';
+import { getHeal } from '../../../normalizers/CastLinkNormalizer';
 import { explanationAndDataSubsection } from 'interface/guide/components/ExplanationRow';
 import { GUIDE_CORE_EXPLANATION_PERCENT } from '../../../Guide';
 import GradiatedPerformanceBar from 'interface/guide/components/GradiatedPerformanceBar';
-
-const HEALING_BONUS = 0.15;
-const OVERHEAL_THRESHOLD = 0.75;
+import { LW_CAST_TIME_DECREASE, LW_HEALING_BONUS, LW_OVERHEAL_THRESHOLD } from '../../../constants';
+import EOLAttrib from '../../core/EchoOfLightAttributor';
+import ItemPercentHealingDone from 'parser/ui/ItemPercentHealingDone';
 
 /**
  * Flash Heal reduces the cast time of your next Heal
@@ -26,6 +26,10 @@ const OVERHEAL_THRESHOLD = 0.75;
 
 //Example log: /report/kVQd4LrBb9RW2h6K/9-Heroic+The+Primal+Council+-+Wipe+5+(5:04)/Delipriest/standard/statistics
 class Lightweaver extends Analyzer {
+  static dependencies = {
+    eolAttrib: EOLAttrib,
+  };
+  protected eolAttrib!: EOLAttrib;
   healingDoneFromTalent = 0;
   overhealingDoneFromTalent = 0;
 
@@ -36,6 +40,8 @@ class Lightweaver extends Analyzer {
   totalFlashHealCasts = 0;
   wastedBuffFlashHealCasts = 0;
   highOverhealFlashHealCasts = 0;
+
+  eolContrib = 0;
 
   constructor(options: Options) {
     super(options);
@@ -59,7 +65,7 @@ class Lightweaver extends Analyzer {
     if (rawHealing === 0) {
       return false;
     }
-    return (event.overheal || 0) / rawHealing >= OVERHEAL_THRESHOLD;
+    return (event.overheal || 0) / rawHealing >= LW_OVERHEAL_THRESHOLD;
   }
 
   onHealCast(event: CastEvent) {
@@ -67,11 +73,11 @@ class Lightweaver extends Analyzer {
     const healEvent = getHeal(event);
     if (healEvent) {
       this.totalHealCasts += 1;
-
-      if (isCastBuffedByLightweaver(event)) {
+      if (this.selectedCombatant.hasBuff(SPELLS.LIGHTWEAVER_TALENT_BUFF)) {
         // calculate effective healing from bonus
-        this.healingDoneFromTalent += calculateEffectiveHealing(healEvent, HEALING_BONUS);
-        this.overhealingDoneFromTalent = calculateOverhealing(healEvent, HEALING_BONUS);
+        this.healingDoneFromTalent += calculateEffectiveHealing(healEvent, LW_HEALING_BONUS);
+        this.eolContrib += this.eolAttrib.getEchoOfLightAmpAttrib(healEvent, LW_HEALING_BONUS);
+        this.overhealingDoneFromTalent = calculateOverhealing(healEvent, LW_HEALING_BONUS);
       } else {
         this.unbuffedHealCasts += 1;
         // return early so we are not counting unbuffed heals for high overheal count
@@ -202,10 +208,39 @@ class Lightweaver extends Analyzer {
       <Statistic
         size="flexible"
         category={STATISTIC_CATEGORY.TALENTS}
-        tooltip={`${overhealingTooltipString}% overhealing`}
+        tooltip={
+          <>
+            {`${overhealingTooltipString}% overhealing`} <br />
+            <br />
+            <div>Breakdown: </div>
+            <div>
+              <SpellLink spell={TALENTS_PRIEST.LIGHTWEAVER_TALENT} />:{' '}
+              <ItemPercentHealingDone amount={this.healingDoneFromTalent}></ItemPercentHealingDone>{' '}
+            </div>
+            <div>
+              <SpellLink spell={SPELLS.ECHO_OF_LIGHT_MASTERY} />:{' '}
+              <ItemPercentHealingDone amount={this.eolContrib}></ItemPercentHealingDone> <br />
+            </div>
+            <br />
+            <div>
+              Notably this module currently is missing the contributions to{' '}
+              <SpellLink spell={TALENTS_PRIEST.BINDING_HEALS_TALENT} /> and{' '}
+              <SpellLink spell={TALENTS_PRIEST.TRAIL_OF_LIGHT_TALENT} />, which can undervalue it.
+            </div>
+          </>
+        }
       >
         <BoringSpellValueText spell={TALENTS.LIGHTWEAVER_TALENT}>
-          <ItemHealingDone amount={this.healingDoneFromTalent} />
+          <div>
+            <ItemHealingDone amount={this.healingDoneFromTalent + this.eolContrib} />{' '}
+            <small> from just the heal amp</small>
+          </div>
+          <div>
+            <ItemHealingDone
+              amount={(this.healingDoneFromTalent + this.eolContrib) / LW_CAST_TIME_DECREASE}
+            />{' '}
+            <small> from both the heal amp and doing that healing in less time</small>
+          </div>
         </BoringSpellValueText>
       </Statistic>
     );

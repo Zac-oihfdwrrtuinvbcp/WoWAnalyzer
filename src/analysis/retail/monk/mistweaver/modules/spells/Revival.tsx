@@ -1,8 +1,8 @@
-import { formatThousands } from 'common/format';
+import { formatNumber, formatThousands } from 'common/format';
 import SPELLS from 'common/SPELLS';
 import { Talent } from 'common/TALENTS/types';
 import { TALENTS_MONK } from 'common/TALENTS';
-import { SpellLink, Tooltip } from 'interface';
+import { SpellLink, Tooltip, TooltipElement } from 'interface';
 import Analyzer, { Options, SELECTED_PLAYER } from 'parser/core/Analyzer';
 import Events, { CastEvent, HealEvent } from 'parser/core/Events';
 import DonutChart from 'parser/ui/DonutChart';
@@ -10,10 +10,8 @@ import Statistic from 'parser/ui/Statistic';
 import STATISTIC_ORDER from 'parser/ui/STATISTIC_ORDER';
 
 import { LESSONS_BUFFS, SPELL_COLORS } from '../../constants';
-import UpliftedSpirits from './UpliftedSpirits';
 import { isFromRevival } from '../../normalizers/CastLinkNormalizer';
 import { explanationAndDataSubsection } from 'interface/guide/components/ExplanationRow';
-import EssenceFont from './EssenceFont';
 import { getLowestPerf, QualitativePerformance } from 'parser/ui/QualitativePerformance';
 import CooldownExpandable, {
   CooldownExpandableItem,
@@ -21,28 +19,30 @@ import CooldownExpandable, {
 import { PerformanceMark } from 'interface/guide';
 import ShaohaosLessons from './ShaohaosLessons';
 import InformationIcon from 'interface/icons/Information';
+import SpellUsable from 'parser/shared/modules/SpellUsable';
 
 interface RevivalCastTracker {
   timeStamp: number; // time of cast
   lessonsBuffActive: boolean; // was SG pre cast
-  numEfHots: number; // number of ef hots on the raid prior to casting
+  celestialOnCd: boolean;
 }
 
 class Revival extends Analyzer {
   static dependencies = {
-    upliftedSpirits: UpliftedSpirits,
-    essenceFont: EssenceFont,
     shaohaos: ShaohaosLessons,
+    spellUsable: SpellUsable,
   };
 
-  protected upliftedSpirits!: UpliftedSpirits;
-  protected essenceFont!: EssenceFont;
+  protected spellUsable!: SpellUsable;
   protected shaohaos!: ShaohaosLessons;
   castTracker: RevivalCastTracker[] = [];
 
   activeTalent!: Talent;
   revivalDirectHealing: number = 0;
   revivalDirectOverHealing: number = 0;
+  upliftedSpiritsActive: boolean = false;
+  usHealing: number = 0;
+  usOverhealing: number = 0;
 
   gustsHealing: number = 0;
   gustOverHealing: number = 0;
@@ -57,6 +57,9 @@ class Revival extends Analyzer {
     if (!this.active) {
       return;
     }
+    this.upliftedSpiritsActive = this.selectedCombatant.hasTalent(
+      TALENTS_MONK.UPLIFTED_SPIRITS_TALENT,
+    );
     this.activeTalent = this.getRevivalTalent();
     this.addEventListener(
       Events.cast
@@ -78,8 +81,13 @@ class Revival extends Analyzer {
       Events.heal.by(SELECTED_PLAYER).spell(SPELLS.GUSTS_OF_MISTS),
       this.handleGustsOfMists,
     );
-    this.minEfHotsBeforeCast =
-      10 + 6 * this.selectedCombatant.getTalentRank(TALENTS_MONK.UPWELLING_TALENT);
+
+    if (this.upliftedSpiritsActive) {
+      this.addEventListener(
+        Events.heal.by(SELECTED_PLAYER).spell(SPELLS.UPLIFTED_SPIRITS_HEAL),
+        this.handleUsHeal,
+      );
+    }
   }
 
   getRevivalTalent() {
@@ -88,11 +96,17 @@ class Revival extends Analyzer {
       : TALENTS_MONK.REVIVAL_TALENT;
   }
 
+  getCelestialTalent(): Talent {
+    return this.selectedCombatant.hasTalent(TALENTS_MONK.INVOKE_CHI_JI_THE_RED_CRANE_TALENT)
+      ? TALENTS_MONK.INVOKE_CHI_JI_THE_RED_CRANE_TALENT
+      : TALENTS_MONK.INVOKE_YULON_THE_JADE_SERPENT_TALENT;
+  }
+
   handleCast(event: CastEvent) {
     this.castTracker.push({
       timeStamp: event.timestamp,
       lessonsBuffActive: LESSONS_BUFFS.some((buff) => this.selectedCombatant.hasBuff(buff.id)),
-      numEfHots: this.essenceFont.curBuffs,
+      celestialOnCd: this.spellUsable.isOnCooldown(this.getCelestialTalent().id),
     });
   }
 
@@ -106,6 +120,11 @@ class Revival extends Analyzer {
       this.gustsHealing += event.amount + (event.absorbed || 0);
       this.gustOverHealing += event.overheal || 0;
     }
+  }
+
+  handleUsHeal(event: HealEvent) {
+    this.usHealing += event.amount + (event.absorbed || 0);
+    this.usOverhealing += event.overheal || 0;
   }
 
   renderRevivalChart() {
@@ -131,12 +150,30 @@ class Revival extends Analyzer {
         color: SPELL_COLORS.UPLIFTED_SPIRITS,
         label: 'Uplifted Spirits',
         spellId: TALENTS_MONK.UPLIFTED_SPIRITS_TALENT.id,
-        value: this.upliftedSpirits.usHealing,
-        valueTooltip: formatThousands(this.upliftedSpirits.usHealing),
+        value: this.usHealing,
+        valueTooltip: formatThousands(this.usHealing),
       });
     }
 
     return <DonutChart items={items} />;
+  }
+
+  get totalHealing() {
+    return this.gustsHealing + this.revivalDirectHealing + this.usHealing;
+  }
+
+  get avgHealingPerCast() {
+    return this.totalHealing / this.castTracker.length;
+  }
+
+  get avgRawPerCast() {
+    return (
+      (this.totalHealing +
+        this.gustOverHealing +
+        this.revivalDirectOverHealing +
+        this.usOverhealing) /
+      this.castTracker.length
+    );
   }
 
   get guideCastBreakdown() {
@@ -147,26 +184,13 @@ class Revival extends Analyzer {
           <SpellLink spell={this.getRevivalTalent()} />
         </strong>{' '}
         is a fairly straightforward cooldown that should be used to heal burst damage events with a
-        relatively short checklist to maximize its healing.
-        {!this.selectedCombatant.hasTalent(TALENTS_MONK.CLOUDED_FOCUS_TALENT) && (
-          <>
-            {' '}
-            Always pre-cast <SpellLink spell={TALENTS_MONK.ESSENCE_FONT_TALENT} /> to get as many
-            duplicated <SpellLink spell={SPELLS.GUSTS_OF_MISTS} /> heals as possible.{' '}
-          </>
-        )}{' '}
-        {this.selectedCombatant.hasTalent(TALENTS_MONK.CLOUDED_FOCUS_TALENT) && (
-          <>
-            {' '}
-            Do <b>not</b> cast <SpellLink spell={TALENTS_MONK.ESSENCE_FONT_TALENT} /> prior to{' '}
-            <SpellLink spell={this.getRevivalTalent()} /> when talented into{' '}
-            <SpellLink spell={TALENTS_MONK.CLOUDED_FOCUS_TALENT} /> as it is not mana efficient,
-            regardless of doubling <SpellLink spell={SPELLS.GUSTS_OF_MISTS} /> healing.
-          </>
-        )}{' '}
-        If talented into <SpellLink spell={TALENTS_MONK.SHAOHAOS_LESSONS_TALENT} />, always pre-cast{' '}
+        relatively short checklist to maximize its healing. If talented into{' '}
+        <SpellLink spell={TALENTS_MONK.SHAOHAOS_LESSONS_TALENT} />, always pre-cast{' '}
         <SpellLink spell={TALENTS_MONK.SHEILUNS_GIFT_TALENT} /> if your next buff is not{' '}
-        <SpellLink spell={SPELLS.LESSON_OF_FEAR_BUFF} />.
+        <SpellLink spell={SPELLS.LESSON_OF_FEAR_BUFF} />. If talented into{' '}
+        <SpellLink spell={TALENTS_MONK.JADE_BOND_TALENT} />, make sure to use{' '}
+        <SpellLink spell={this.getRevivalTalent()} /> while your celestial is on cooldown in order
+        to get celestial CDR.
       </p>
     );
     const data = (
@@ -182,25 +206,6 @@ class Revival extends Analyzer {
           );
           const checklistItems: CooldownExpandableItem[] = [];
           const allPerfs: QualitativePerformance[] = [];
-          if (this.selectedCombatant.hasTalent(TALENTS_MONK.JADE_BOND_TALENT)) {
-            let efPerf = QualitativePerformance.Good;
-            if (cast.numEfHots < Math.floor(this.minEfHotsBeforeCast * 0.75)) {
-              efPerf = QualitativePerformance.Fail;
-            } else if (cast.numEfHots < Math.floor(this.minEfHotsBeforeCast * 0.9)) {
-              efPerf = QualitativePerformance.Ok;
-            }
-            checklistItems.push({
-              label: (
-                <>
-                  <SpellLink spell={TALENTS_MONK.ESSENCE_FONT_TALENT} /> HoTs active on cast
-                </>
-              ),
-              result: <PerformanceMark perf={efPerf} />,
-              details: <>{cast.numEfHots}</>,
-            });
-            allPerfs.push(efPerf);
-          }
-
           if (this.selectedCombatant.hasTalent(TALENTS_MONK.SHAOHAOS_LESSONS_TALENT)) {
             let lessonPerf = QualitativePerformance.Fail;
             if (
@@ -237,6 +242,36 @@ class Revival extends Analyzer {
             });
             allPerfs.push(lessonPerf);
           }
+          if (this.selectedCombatant.hasTalent(TALENTS_MONK.JADE_BOND_TALENT)) {
+            const jbPerf = cast.celestialOnCd
+              ? QualitativePerformance.Good
+              : QualitativePerformance.Fail;
+            checklistItems.push({
+              label: (
+                <>
+                  <SpellLink spell={this.getCelestialTalent()} /> on cooldown
+                  <Tooltip
+                    hoverable
+                    content={
+                      <>
+                        Make sure to cast <SpellLink spell={this.getRevivalTalent()} /> when your
+                        celestial is on cooldown in order to get celestial CDR from{' '}
+                        <SpellLink spell={TALENTS_MONK.JADE_BOND_TALENT} />
+                      </>
+                    }
+                  >
+                    <span>
+                      {' '}
+                      <InformationIcon />
+                    </span>
+                  </Tooltip>
+                </>
+              ),
+              result: <PerformanceMark perf={jbPerf} />,
+              details: <>{jbPerf === QualitativePerformance.Good ? <>Yes</> : <>No</>}</>,
+            });
+            allPerfs.push(jbPerf);
+          }
           const averagePerf = getLowestPerf(allPerfs);
           return (
             <CooldownExpandable
@@ -260,6 +295,16 @@ class Revival extends Analyzer {
             <SpellLink spell={this.activeTalent}>{this.activeTalent.name}</SpellLink> breakdown
           </label>
           {this.renderRevivalChart()}
+          <hr />
+          <TooltipElement
+            content={
+              <>
+                {formatNumber(this.avgRawPerCast)} <small>raw healing per cast</small>
+              </>
+            }
+          >
+            {formatNumber(this.avgHealingPerCast)} average Healing Per Cast
+          </TooltipElement>
         </div>
       </Statistic>
     );

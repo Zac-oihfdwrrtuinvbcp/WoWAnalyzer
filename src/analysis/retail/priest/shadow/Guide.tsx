@@ -1,6 +1,6 @@
 import { GuideProps, Section, SubSection } from 'interface/guide';
 import TALENTS from 'common/TALENTS/priest';
-import { TIERS } from 'game/TIERS';
+//import { TIERS } from 'game/TIERS';
 import CombatLogParser from './CombatLogParser';
 import PreparationSection from 'interface/guide/components/Preparation/PreparationSection';
 import CooldownGraphSubsection from './modules/guide/CooldownGraphSubsection';
@@ -25,7 +25,6 @@ export default function Guide({ modules, events, info }: GuideProps<typeof Comba
       <Section title="Cooldowns">
         <Section title="Core Spells">
           <CooldownGraphSubsection.CoreCooldownsGraph />
-          {info.combatant.has4PieceByTier(TIERS.DF3) && modules.tier31FourSet.guideSubsection}
         </Section>
         <Section title="Short Cooldowns">
           <CooldownGraphSubsection.ShortCooldownsGraph />
@@ -33,11 +32,15 @@ export default function Guide({ modules, events, info }: GuideProps<typeof Comba
             modules.insidiousIre.guideSubsection}
           {info.combatant.hasTalent(TALENTS.VOID_TORRENT_TALENT) &&
             modules.voidTorrent.guideSubsection}
-          {info.combatant.hasTalent(TALENTS.SHADOW_CRASH_TALENT) &&
+          {info.combatant.hasTalent(TALENTS.SHADOW_CRASH_1_SHADOW_TALENT) &&
+            modules.shadowCrash.guideSubsection}
+          {info.combatant.hasTalent(TALENTS.SHADOW_CRASH_2_SHADOW_TALENT) &&
             modules.shadowCrash.guideSubsection}
         </Section>
         <Section title="Major Cooldowns">
           <CooldownGraphSubsection.LongCooldownsGraph />
+          {/*TODO*/}
+          {/*info.combatant.hasTalent(TALENTS.POWER_SURGE_TALENT) && modules.halo.guideSubsection*/}
           {info.combatant.hasTalent(TALENTS.VOID_ERUPTION_TALENT) &&
             modules.voidform.guideSubsection}
           {info.combatant.hasTalent(TALENTS.INESCAPABLE_TORMENT_TALENT) &&
@@ -65,6 +68,10 @@ export default function Guide({ modules, events, info }: GuideProps<typeof Comba
         {info.combatant.hasTalent(TALENTS.DEATHSPEAKER_TALENT) &&
           modules.deathspeaker.guideSubsection}
       </Section>
+
+      {/* TODO:
+      <Section title="Hero Talent?"></>
+      */}
 
       <Section title="Action Priority List">
         <SubSection>Coming Soon!</SubSection>

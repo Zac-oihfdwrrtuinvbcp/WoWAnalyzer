@@ -763,7 +763,7 @@ class SpellUsable extends Analyzer {
     ) {
       annotation = {
         color: BadColor,
-        summary: `${spellName(spellId)} (ID=${spellId}) was used while SpellUsable's tracker thought it had no available charges`,
+        summary: `${spellName(spellId)} (ID=${spellId}) was used while SpellUsable's tracker thought it had no available charges (expected end @ ${this.owner.formatTimestamp(info.expectedEnd)})`,
         // note: we are making a copy of `info` so that later display is not muddled by mutation
         details: (
           <SpellUsableDebugDescription cdInfo={{ ...info }} event={event} parser={this.owner} />
@@ -774,6 +774,10 @@ class SpellUsable extends Analyzer {
         color: OkColor,
         summary: `Ability ${event.ability.name} (ID: ${event.ability.guid}) was used but is not in spellbook or listed as a cast that isn't a cast`,
       };
+      console.warn(
+        'Ability is missing from spellbook (check out spellUsable in the debug annotation view for more info):',
+        event.ability,
+      );
     } else {
       annotation = {
         color: GoodColor,
