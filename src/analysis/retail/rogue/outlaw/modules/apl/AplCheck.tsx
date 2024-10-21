@@ -149,25 +149,6 @@ const COMMON_COOLDOWN: Rule[] = [
       ),
     ),
   },
-  {
-    spell: TALENTS.SHADOW_DANCE_TALENT,
-    condition: describe(
-      and(
-        buffMissing(SPELLS.AUDACITY_TALENT_BUFF),
-        buffMissing(SPELLS.OPPORTUNITY),
-        //This is a given no point displaying it
-        notInStealthCondition(),
-        //We want to allow the user to press dance at max cp, but that is not a requirement
-        or(not(hasFinisherCondition()), optionalRule(hasFinisherCondition())),
-      ),
-      (tense) => (
-        <>
-          <SpellLink spell={SPELLS.AUDACITY_TALENT_BUFF} /> and{' '}
-          <SpellLink spell={SPELLS.OPPORTUNITY} /> {tenseAlt(tense, 'are', 'were')} missing
-        </>
-      ),
-    ),
-  },
 ];
 
 const COMMON_FINISHER: Rule[] = [
